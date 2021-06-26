@@ -1,0 +1,25 @@
+plugins {
+    id 'java'
+    id 'idea'
+}
+
+apply from: './versions.gradle'
+
+group 'dev.maxuz.ttcli'
+version '0.0-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation "info.picocli:picocli:${versions['picocli']}"
+    annotationProcessor "info.picocli:picocli-codegen:${versions['picocli']}"
+
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.0'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.7.0'
+}
+
+test {
+    useJUnitPlatform()
+}
