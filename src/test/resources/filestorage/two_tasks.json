@@ -1,0 +1,9 @@
+{
+  "tasks" : [ {
+    "code" : "SECOND_TASK",
+    "state" : "WAITING"
+  }, {
+    "code" : "NEW_TASK_CODE",
+    "state" : "IN_PROGRESS"
+  } ]
+}
