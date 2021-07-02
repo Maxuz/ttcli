@@ -1,4 +1,4 @@
-package dev.maxuz.ttcli;
+package dev.maxuz.ttcli.command;
 
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
