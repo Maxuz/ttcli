@@ -11,8 +11,8 @@ import picocli.CommandLine.Parameters;
 
 @Slf4j
 @Component
-@Command(name = "add", description = "Add a new task to the today's task list.")
-public class AddCommand implements Runnable {
+@Command(name = "add", description = "Add a new task to the task list.")
+public class AddCommand implements SubCommand {
 
     private final TaskService taskService;
 

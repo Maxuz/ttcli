@@ -87,11 +87,9 @@ public class FileTaskDataProvider implements TaskDataProvider {
     }
 
     @Override
-    public Map<String, Task> getTasksAsMap() {
-        List<TaskTO> taskTOList = getTaskTOList();
-
-        return taskTOList.stream()
+    public List<Task> getTasks() {
+        return getTaskTOList().stream()
             .map(taskConverter::convert)
-            .collect(Collectors.toMap(Task::getCode, t -> t));
+            .collect(Collectors.toList());
     }
 }

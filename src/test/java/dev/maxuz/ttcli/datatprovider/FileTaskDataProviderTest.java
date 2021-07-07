@@ -104,14 +104,14 @@ class FileTaskDataProviderTest {
 
         dataProvider.saveTask(new Task());
 
-        String expected = contentOf(getPathFromResource("filestorage/two_tasks.json").toFile());
+        String expected = contentOf(getPathFromResource("filestorage/one_is_waiting_another_one_is_in_progress.json").toFile());
         assertThat(contentOf(storage.toFile())).isEqualTo(expected);
     }
 
     @Test
     void saveTask_UpdateTask_TaskUpdated() throws Exception {
         Path storage = createTempStorage();
-        Files.writeString(storage, contentOf(getPathFromResource("filestorage/two_tasks.json").toFile()));
+        Files.writeString(storage, contentOf(getPathFromResource("filestorage/one_is_waiting_another_one_is_in_progress.json").toFile()));
         FileTaskDataProvider dataProvider = new FileTaskDataProvider(new FileDataProviderConfig(storage), taskConverter);
 
         TaskTO taskTO = new TaskTO();
@@ -139,7 +139,7 @@ class FileTaskDataProviderTest {
             .thenReturn(expected);
 
         Path storage = createTempStorage();
-        Files.writeString(storage, contentOf(getPathFromResource("filestorage/two_tasks.json").toFile()));
+        Files.writeString(storage, contentOf(getPathFromResource("filestorage/one_is_waiting_another_one_is_in_progress.json").toFile()));
         FileTaskDataProvider dataProvider = new FileTaskDataProvider(new FileDataProviderConfig(storage), taskConverter);
 
         assertThat(dataProvider.getTaskInProgress()).isSameAs(expected);
@@ -155,7 +155,7 @@ class FileTaskDataProviderTest {
     }
 
     @Test
-    void getTasksAsMap() throws Exception {
+    void getTasks() throws Exception {
         Task task = new Task();
         task.setCode("NEW_TASK_CODE");
         task.setState(TaskState.WAITING);
@@ -166,6 +166,6 @@ class FileTaskDataProviderTest {
         Files.writeString(storage, contentOf(getPathFromResource("filestorage/new_task.json").toFile()));
         FileTaskDataProvider dataProvider = new FileTaskDataProvider(new FileDataProviderConfig(storage), taskConverter);
 
-        assertThat(dataProvider.getTasksAsMap()).isEqualTo(Collections.singletonMap(task.getCode(), task));
+        assertThat(dataProvider.getTasks()).isEqualTo(Collections.singletonList(task));
     }
 }

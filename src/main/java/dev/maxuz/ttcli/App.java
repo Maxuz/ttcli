@@ -1,13 +1,15 @@
 package dev.maxuz.ttcli;
 
 
-import dev.maxuz.ttcli.command.AddCommand;
-import dev.maxuz.ttcli.command.TtCommand;
+import dev.maxuz.ttcli.command.MainCommand;
+import dev.maxuz.ttcli.command.SubCommand;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import picocli.CommandLine;
+
+import java.util.List;
 
 @Slf4j
 @SpringBootApplication(scanBasePackages = "dev.maxuz.ttcli")
@@ -16,17 +18,17 @@ public class App implements CommandLineRunner {
         SpringApplication.run(App.class, args);
     }
 
-    public App(AddCommand addCommand) {
-        this.addCommand = addCommand;
+    public App(List<SubCommand> subCommands) {
+        this.subCommands = subCommands;
     }
 
-    private final AddCommand addCommand;
+    private final List<SubCommand> subCommands;
 
     @Override
     public void run(String... args) {
-        int exitCode = new CommandLine(new TtCommand())
-            .addSubcommand(addCommand)
-            .execute(args);
+        CommandLine commandLine = new CommandLine(new MainCommand());
+        subCommands.forEach(commandLine::addSubcommand);
+        int exitCode = commandLine.execute(args);
         System.exit(exitCode);
     }
 }

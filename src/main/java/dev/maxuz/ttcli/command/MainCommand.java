@@ -5,6 +5,6 @@ import picocli.CommandLine.Command;
 
 @Command(subcommands = {CommandLine.HelpCommand.class},
     mixinStandardHelpOptions = true)
-public class TtCommand {
+public class MainCommand {
 
 }

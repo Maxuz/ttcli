@@ -1,9 +1,11 @@
 {
   "tasks" : [ {
     "code" : "SECOND_TASK",
-    "state" : "WAITING"
+    "state" : "WAITING",
+    "timeSpent" : 0
   }, {
     "code" : "NEW_TASK_CODE",
-    "state" : "WAITING"
+    "state" : "WAITING",
+    "timeSpent" : 0
   } ]
 }

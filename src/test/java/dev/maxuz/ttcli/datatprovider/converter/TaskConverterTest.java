@@ -22,12 +22,16 @@ class TaskConverterTest {
         Task source = new Task();
         source.setCode("task code");
         source.setState(TaskState.IN_PROGRESS);
+        source.setTimeSpent(100);
+        source.setStartTime(10000L);
 
         TaskTO actual = converter.convert(source);
 
         assertThat(actual).isNotNull();
         assertThat(actual.getCode()).isEqualTo("task code");
         assertThat(actual.getState()).isEqualTo(TaskStateTO.IN_PROGRESS);
+        assertThat(actual.getTimeSpent()).isEqualTo(100);
+        assertThat(actual.getStartTime()).isEqualTo(10000L);
     }
 
     @Test
@@ -37,11 +41,15 @@ class TaskConverterTest {
         TaskTO source = new TaskTO();
         source.setCode("task code");
         source.setState(TaskStateTO.IN_PROGRESS);
+        source.setTimeSpent(100);
+        source.setStartTime(10000L);
 
         Task actual = converter.convert(source);
 
         assertThat(actual).isNotNull();
         assertThat(actual.getCode()).isEqualTo("task code");
         assertThat(actual.getState()).isEqualTo(TaskState.IN_PROGRESS);
+        assertThat(actual.getTimeSpent()).isEqualTo(100);
+        assertThat(actual.getStartTime()).isEqualTo(10000L);
     }
 }

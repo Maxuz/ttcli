@@ -17,4 +17,24 @@ public interface TaskService {
      * do nothing.
      */
     void stopCurrent();
+
+    void stop(Task task);
+
+    /**
+     * Find a task by code
+     * @param code of the task
+     * @return task, or null
+     */
+    Task getTask(String code);
+
+    /**
+     * Stops all the task with state IN_PROGRESS
+     */
+    void stopAll();
+
+    /**
+     * Starts the task
+     * @param task to start
+     */
+    void start(Task task);
 }

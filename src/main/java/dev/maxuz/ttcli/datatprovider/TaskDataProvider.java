@@ -2,7 +2,7 @@ package dev.maxuz.ttcli.datatprovider;
 
 import dev.maxuz.ttcli.model.Task;
 
-import java.util.Map;
+import java.util.List;
 
 public interface TaskDataProvider {
     /**
@@ -21,5 +21,5 @@ public interface TaskDataProvider {
      * Get all tasks
      * @return all tasks
      */
-    Map<String, Task> getTasksAsMap();
+    List<Task> getTasks();
 }
