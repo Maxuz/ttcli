@@ -2,6 +2,7 @@ package dev.maxuz.ttcli.command;
 
 import dev.maxuz.ttcli.model.Task;
 import dev.maxuz.ttcli.model.TaskState;
+import dev.maxuz.ttcli.printer.Printer;
 import dev.maxuz.ttcli.service.TaskService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -16,10 +17,11 @@ import static org.mockito.Mockito.*;
 
 class AddCommandTest {
     private final TaskService taskService = mock(TaskService.class);
+    private final Printer printer = mock(Printer.class);
 
     @Test
     void addTask() {
-        AddCommand command = new AddCommand(taskService);
+        AddCommand command = new AddCommand(taskService, printer);
         command.setCode("TASK_CODE");
 
         command.run();
@@ -41,7 +43,7 @@ class AddCommandTest {
     @ParameterizedTest
     @MethodSource("addTaskStartImmediatelySource")
     void addTask_StartImmediatelyIsTrue(boolean startImmediately, TaskState expected) {
-        AddCommand command = new AddCommand(taskService);
+        AddCommand command = new AddCommand(taskService, printer);
         command.setCode("TASK_CODE");
         command.setStartImmediately(startImmediately);
 
@@ -57,5 +59,6 @@ class AddCommandTest {
         verify(taskService).addTask(taskArgumentCaptor.capture());
         Task task = taskArgumentCaptor.getValue();
         assertThat(task.getState()).isEqualTo(expected);
+        verify(printer).info("Task {} added successfully", "TASK_CODE");
     }
 }

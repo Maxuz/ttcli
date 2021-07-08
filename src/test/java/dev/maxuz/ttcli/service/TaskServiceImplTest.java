@@ -13,7 +13,9 @@ import org.mockito.ArgumentCaptor;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -207,4 +209,13 @@ class TaskServiceImplTest {
 
         verify(taskDataProvider, times(0)).saveTask(any());
     }
+
+    @Test
+    void listTasks() {
+        List<Task> tasks = Arrays.asList(new Task(), new Task());
+        when(taskDataProvider.getTasks())
+            .thenReturn(tasks);
+        assertThat(service.getTasks()).isEqualTo(tasks);
+    }
+
 }

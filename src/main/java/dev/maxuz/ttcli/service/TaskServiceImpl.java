@@ -10,6 +10,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -85,5 +86,10 @@ public class TaskServiceImpl implements TaskService {
         task.setState(TaskState.IN_PROGRESS);
         task.setStartTime(Instant.now().toEpochMilli());
         taskDataProvider.saveTask(task);
+    }
+
+    @Override
+    public List<Task> getTasks() {
+        return taskDataProvider.getTasks();
     }
 }

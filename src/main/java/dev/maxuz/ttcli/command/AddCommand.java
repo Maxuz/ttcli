@@ -2,22 +2,23 @@ package dev.maxuz.ttcli.command;
 
 import dev.maxuz.ttcli.model.Task;
 import dev.maxuz.ttcli.model.TaskState;
+import dev.maxuz.ttcli.printer.Printer;
 import dev.maxuz.ttcli.service.TaskService;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 import picocli.CommandLine.Parameters;
 
-@Slf4j
 @Component
 @Command(name = "add", description = "Add a new task to the task list.")
 public class AddCommand implements SubCommand {
 
     private final TaskService taskService;
+    private final Printer printer;
 
-    public AddCommand(TaskService taskService) {
+    public AddCommand(TaskService taskService, Printer printer) {
         this.taskService = taskService;
+        this.printer = printer;
     }
 
     // parameters
@@ -43,7 +44,7 @@ public class AddCommand implements SubCommand {
             taskService.stopCurrent();
         }
         taskService.addTask(task);
-        log.info("Task {} added successfully", task.getCode());
+        printer.info("Task {} added successfully", task.getCode());
     }
 
     private Task createTask() {

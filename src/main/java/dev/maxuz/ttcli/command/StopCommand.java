@@ -2,22 +2,22 @@ package dev.maxuz.ttcli.command;
 
 import dev.maxuz.ttcli.exception.TtRuntimeException;
 import dev.maxuz.ttcli.model.Task;
+import dev.maxuz.ttcli.printer.Printer;
 import dev.maxuz.ttcli.service.TaskService;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import picocli.CommandLine.Command;
-import picocli.CommandLine.Option;
 import picocli.CommandLine.Parameters;
 
-@Slf4j
 @Component
 @Command(name = "stop", description = "Stop the task (calculate spent time and change state to WAITING)")
 public class StopCommand implements SubCommand {
 
     private final TaskService taskService;
+    private final Printer printer;
 
-    public StopCommand(TaskService taskService) {
+    public StopCommand(TaskService taskService, Printer printer) {
         this.taskService = taskService;
+        this.printer = printer;
     }
 
     // parameters
@@ -35,6 +35,6 @@ public class StopCommand implements SubCommand {
             throw new TtRuntimeException("Task with code [" + code + "] is not found");
         }
         taskService.stop(task);
-        log.info("Task {} stopped", task.getCode());
+        printer.info("Task {} stopped", task.getCode());
     }
 }

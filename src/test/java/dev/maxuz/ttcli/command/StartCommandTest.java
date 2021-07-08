@@ -3,6 +3,7 @@ package dev.maxuz.ttcli.command;
 import dev.maxuz.ttcli.exception.TtRuntimeException;
 import dev.maxuz.ttcli.model.Task;
 import dev.maxuz.ttcli.model.TaskState;
+import dev.maxuz.ttcli.printer.Printer;
 import dev.maxuz.ttcli.service.TaskService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -17,6 +18,7 @@ import static org.mockito.Mockito.*;
 
 class StartCommandTest {
     private final TaskService taskService = mock(TaskService.class);
+    private final Printer printer = mock(Printer.class);
 
     @Test
     void startTask_TaskExists_StartTaskCalled() {
@@ -27,12 +29,13 @@ class StartCommandTest {
         when(taskService.getTask("TASK_CODE"))
             .thenReturn(task);
 
-        StartCommand command = new StartCommand(taskService);
+        StartCommand command = new StartCommand(taskService, printer);
         command.setCode(task.getCode());
 
         command.run();
 
         verify(taskService).start(task);
+        verify(printer).info("Task {} successfully started", "TASK_CODE");
     }
 
     @Test
@@ -40,7 +43,7 @@ class StartCommandTest {
         when(taskService.getTask("TASK_CODE"))
             .thenReturn(null);
 
-        StartCommand command = new StartCommand(taskService);
+        StartCommand command = new StartCommand(taskService, printer);
         command.setCode("TASK_CODE");
 
         TtRuntimeException exception = assertThrows(TtRuntimeException.class, command::run);
@@ -62,7 +65,7 @@ class StartCommandTest {
         when(taskService.getTask("TASK_CODE"))
             .thenReturn(new Task());
 
-        StartCommand command = new StartCommand(taskService);
+        StartCommand command = new StartCommand(taskService, printer);
         command.setCode("TASK_CODE");
         command.setStopOthers(stopOthers);
 

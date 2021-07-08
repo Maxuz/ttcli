@@ -2,6 +2,8 @@ package dev.maxuz.ttcli.service;
 
 import dev.maxuz.ttcli.model.Task;
 
+import java.util.List;
+
 /**
  * Service for handling tasks actions
  */
@@ -18,6 +20,10 @@ public interface TaskService {
      */
     void stopCurrent();
 
+    /**
+     * Stop the task
+     * @param task to stop
+     */
     void stop(Task task);
 
     /**
@@ -37,4 +43,10 @@ public interface TaskService {
      * @param task to start
      */
     void start(Task task);
+
+    /**
+     * Get all tasks
+     * @return list of all tasks
+     */
+    List<Task> getTasks();
 }
