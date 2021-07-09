@@ -92,4 +92,10 @@ public class TaskServiceImpl implements TaskService {
     public List<Task> getTasks() {
         return taskDataProvider.getTasks();
     }
+
+    @Override
+    public void addTime(Task task, long timeToAdd) {
+        task.setTimeSpent(task.getTimeSpent() + timeToAdd);
+        taskDataProvider.saveTask(task);
+    }
 }

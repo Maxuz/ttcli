@@ -8,7 +8,7 @@ import java.time.Instant;
 import java.util.List;
 
 /**
- * Interface for printing message to user
+ * Class for printing message to a user
  */
 @Slf4j
 @Service

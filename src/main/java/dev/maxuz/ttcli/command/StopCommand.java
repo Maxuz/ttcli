@@ -10,7 +10,7 @@ import picocli.CommandLine.Parameters;
 
 @Component
 @Command(name = "stop", description = "Stop the task (calculate spent time and change state to WAITING)")
-public class StopCommand implements SubCommand {
+public class StopCommand implements SubCommand, Runnable {
 
     private final TaskService taskService;
     private final Printer printer;

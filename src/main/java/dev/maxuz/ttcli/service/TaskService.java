@@ -49,4 +49,11 @@ public interface TaskService {
      * @return list of all tasks
      */
     List<Task> getTasks();
+
+    /**
+     * Added time to the task
+     * @param task to add time
+     * @param timeToAdd time to add in milliseconds
+     */
+    void addTime(Task task, long timeToAdd);
 }

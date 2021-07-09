@@ -11,7 +11,7 @@ import picocli.CommandLine.Parameters;
 
 @Component
 @Command(name = "start", description = "Setting the start time and change status to the IN_PROGRESS")
-public class StartCommand implements SubCommand {
+public class StartCommand implements SubCommand, Runnable {
 
     private final TaskService taskService;
     private final Printer printer;

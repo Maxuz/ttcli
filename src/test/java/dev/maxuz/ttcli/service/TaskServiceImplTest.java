@@ -218,4 +218,30 @@ class TaskServiceImplTest {
         assertThat(service.getTasks()).isEqualTo(tasks);
     }
 
+    @Test
+    void addTime() {
+        Task task = new Task();
+        task.setTimeSpent(0);
+
+        service.addTime(task, 64000L);
+
+        ArgumentCaptor<Task> taskArgumentCaptor = ArgumentCaptor.forClass(Task.class);
+        verify(taskDataProvider).saveTask(taskArgumentCaptor.capture());
+
+        assertThat(taskArgumentCaptor.getValue().getTimeSpent()).isEqualTo(64000L);
+    }
+
+    @Test
+    void addTime_TimeSpentIsNotNull() {
+        Task task = new Task();
+        task.setTimeSpent(20000L);
+
+        service.addTime(task, 64000L);
+
+        ArgumentCaptor<Task> taskArgumentCaptor = ArgumentCaptor.forClass(Task.class);
+        verify(taskDataProvider).saveTask(taskArgumentCaptor.capture());
+
+        assertThat(taskArgumentCaptor.getValue().getTimeSpent()).isEqualTo(84000L);
+    }
+
 }

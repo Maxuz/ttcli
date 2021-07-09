@@ -7,7 +7,7 @@ import picocli.CommandLine.Command;
 
 @Component
 @Command(name = "list", description = "Shows information about all tasks")
-public class ListCommand implements SubCommand {
+public class ListCommand implements SubCommand, Runnable {
 
     private final TaskService taskService;
     private final Printer printer;

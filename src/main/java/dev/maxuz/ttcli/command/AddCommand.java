@@ -11,7 +11,7 @@ import picocli.CommandLine.Parameters;
 
 @Component
 @Command(name = "add", description = "Add a new task to the task list.")
-public class AddCommand implements SubCommand {
+public class AddCommand implements SubCommand, Runnable {
 
     private final TaskService taskService;
     private final Printer printer;
