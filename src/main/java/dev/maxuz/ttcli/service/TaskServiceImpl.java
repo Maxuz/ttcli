@@ -94,8 +94,24 @@ public class TaskServiceImpl implements TaskService {
     }
 
     @Override
-    public void addTime(Task task, long timeToAdd) {
-        task.setTimeSpent(task.getTimeSpent() + timeToAdd);
+    public void addTime(Task task, long time) {
+        task.setTimeSpent(task.getTimeSpent() + time);
+        taskDataProvider.saveTask(task);
+    }
+
+    @Override
+    public void subtractTime(Task task, long time) {
+        long timeSpent = task.getTimeSpent();
+        Long startTime = task.getStartTime();
+        if (timeSpent >= time) {
+            task.setTimeSpent(timeSpent - time);
+        } else {
+            if (startTime != null) {
+                long now = Instant.now().toEpochMilli();
+                task.setStartTime(Math.min((startTime + (time - timeSpent)), now));
+            }
+            task.setTimeSpent(0L);
+        }
         taskDataProvider.saveTask(task);
     }
 }

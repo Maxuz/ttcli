@@ -4,6 +4,7 @@ import dev.maxuz.ttcli.exception.TtRuntimeException;
 import dev.maxuz.ttcli.model.Task;
 import dev.maxuz.ttcli.printer.Printer;
 import dev.maxuz.ttcli.service.TaskService;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -72,5 +73,85 @@ class TimeCommandTest {
         assertEquals("Invalid time format. Expected example 1h 32m 11s", exception.getMessage());
 
         verify(taskService, times(0)).addTime(any(), anyLong());
+    }
+
+    @Test
+    void addTime_TaskDoesNotExist_ThrowsException() {
+        when(taskService.getTask(any())).thenReturn(null);
+
+        TimeCommand command = new TimeCommand(taskService, printer);
+        command.setCode("NonExistedTask");
+
+        TtRuntimeException exception = assertThrows(TtRuntimeException.class, () -> command.add("10s"));
+        assertEquals("Task with code [NonExistedTask] is not found", exception.getMessage());
+
+        verify(taskService, times(0)).addTime(any(), anyLong());
+    }
+
+    private static Stream<Arguments> subtractTimeValidDataSource() {
+        return Stream.of(
+            Arguments.of("7s", 7000L),
+            Arguments.of("59s", 59000L),
+            Arguments.of("61s", 61000L),
+            Arguments.of("1m", 60000L),
+            Arguments.of("1m 59s", 119000L),
+            Arguments.of("59m", 3540000L),
+            Arguments.of("61m 12s", 3672000L),
+            Arguments.of("1h", 3600000L),
+            Arguments.of("1h 60s", 3660000L),
+            Arguments.of("3h", 10800000L),
+            Arguments.of("0s", 0L)
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource("subtractTimeValidDataSource")
+    void subtractTime_ValidData(String time, long expected) {
+        Task task = new Task();
+        task.setCode("Task code");
+
+        when(taskService.getTask("Task code")).thenReturn(task);
+
+        TimeCommand command = new TimeCommand(taskService, printer);
+        command.setCode("Task code");
+
+        command.subtract(time);
+
+        ArgumentCaptor<Long> timeArgumentCaptor = ArgumentCaptor.forClass(Long.class);
+        verify(taskService).subtractTime(eq(task), timeArgumentCaptor.capture());
+
+        assertEquals(expected, timeArgumentCaptor.getValue());
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {
+        "", "11", "123h 11", "h", "s"
+    })
+    void subtractTime_InvalidData_ThrowsException(String time) {
+        Task task = new Task();
+        task.setCode("Task code");
+
+        when(taskService.getTask("Task code")).thenReturn(task);
+
+        TimeCommand command = new TimeCommand(taskService, printer);
+        command.setCode("Task code");
+
+        TtRuntimeException exception = assertThrows(TtRuntimeException.class, () -> command.subtract(time));
+        assertEquals("Invalid time format. Expected example 1h 32m 11s", exception.getMessage());
+
+        verify(taskService, times(0)).subtractTime(any(), anyLong());
+    }
+
+    @Test
+    void subtractTime_TaskDoesNotExist_ThrowsException() {
+        when(taskService.getTask(any())).thenReturn(null);
+
+        TimeCommand command = new TimeCommand(taskService, printer);
+        command.setCode("NonExistedTask");
+
+        TtRuntimeException exception = assertThrows(TtRuntimeException.class, () -> command.subtract("10s"));
+        assertEquals("Task with code [NonExistedTask] is not found", exception.getMessage());
+
+        verify(taskService, times(0)).subtractTime(any(), anyLong());
     }
 }

@@ -53,7 +53,14 @@ public interface TaskService {
     /**
      * Added time to the task
      * @param task to add time
-     * @param timeToAdd time to add in milliseconds
+     * @param time to add in milliseconds
      */
-    void addTime(Task task, long timeToAdd);
+    void addTime(Task task, long time);
+
+    /**
+     * Subtract time from the task
+     * @param task to subtract time
+     * @param time to subtract
+     */
+    void subtractTime(Task task, long time);
 }

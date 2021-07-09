@@ -83,4 +83,16 @@ public class TimeCommand implements SubCommand {
             throw new TtRuntimeException(TIME_FORMAT_ERROR_MSG);
         }
     }
+
+    @Command(name = "subtract", aliases = {"sub"}, description = "Add time")
+    public void subtract(
+        @Parameters(paramLabel = "<time to subtract>",
+            description = "Amount of time to subtract. You can specify how many hours, minutes or seconds you want to subtract" +
+                "by passing values separated with space and specified with a time unit. Valid time units are h, m, s " +
+                "(hours, minutes, seconds respectively)") String amountOfTimeString) {
+        long millis = getTime(amountOfTimeString);
+        Task task = getTask();
+        taskService.subtractTime(task, millis);
+        printer.info("Time successfully subtracted.");
+    }
 }
