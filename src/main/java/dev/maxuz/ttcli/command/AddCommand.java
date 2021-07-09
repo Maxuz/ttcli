@@ -32,7 +32,7 @@ public class AddCommand implements SubCommand, Runnable {
     // options
     private boolean startImmediately = false;
 
-    @Option(names = { "--start" }, description = "Change the current task state to WAITING and set the status for this task as IN_PROGRESS")
+    @Option(names = { "-s", "--start" }, description = "Change the current task state to WAITING and set the status for this task as IN_PROGRESS")
     public void setStartImmediately(boolean startImmediately) {
         this.startImmediately = startImmediately;
     }
