@@ -33,6 +33,7 @@ public class Printer {
             log.info("{}\tstate: {}\ttime: {}", task.getCode(), task.getState(), timeConverter.convert(taskTime));
             totalTime += taskTime;
         }
+        log.info("\n=================");
         log.info("Total time: {}", timeConverter.convert(totalTime));
     }
 }
