@@ -1,2 +1,3 @@
 # ttcli
-Simple task tracker client
+
+Simple task time CLI (command line interface) tracker. 
