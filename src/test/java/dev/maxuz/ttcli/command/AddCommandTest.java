@@ -4,12 +4,15 @@ import dev.maxuz.ttcli.model.Task;
 import dev.maxuz.ttcli.model.TaskState;
 import dev.maxuz.ttcli.printer.Printer;
 import dev.maxuz.ttcli.service.TaskService;
+import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.ArgumentCaptor;
 
+import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
@@ -33,32 +36,20 @@ class AddCommandTest {
         assertThat(task.getState()).isEqualTo(TaskState.WAITING);
     }
 
-    private static Stream<Arguments> addTaskStartImmediatelySource() {
-        return Stream.of(
-            Arguments.of(true, TaskState.IN_PROGRESS),
-            Arguments.of(false, TaskState.WAITING)
-        );
-    }
-
-    @ParameterizedTest
-    @MethodSource("addTaskStartImmediatelySource")
-    void addTask_StartImmediatelyIsTrue(boolean startImmediately, TaskState expected) {
+    @Test
+    void addTask_StartImmediatelyIsTrue() {
         AddCommand command = new AddCommand(taskService, printer);
         command.setCode("TASK_CODE");
-        command.setStartImmediately(startImmediately);
+        command.setStartImmediately(true);
 
         command.run();
 
-        if (startImmediately) {
-            verify(taskService).stopCurrent();
-        } else {
-            verify(taskService, times(0)).stopCurrent();
-        }
 
         ArgumentCaptor<Task> taskArgumentCaptor = ArgumentCaptor.forClass(Task.class);
         verify(taskService).addTask(taskArgumentCaptor.capture());
         Task task = taskArgumentCaptor.getValue();
-        assertThat(task.getState()).isEqualTo(expected);
+        verify(taskService).stopCurrent();
+        verify(taskService).start(task);
         verify(printer).info("Task {} added successfully", "TASK_CODE");
     }
 }

@@ -40,24 +40,19 @@ public class AddCommand implements SubCommand, Runnable {
     @Override
     public void run() {
         Task task = createTask();
+        taskService.addTask(task);
+
         if (startImmediately) {
             taskService.stopCurrent();
+            taskService.start(task);
         }
-        taskService.addTask(task);
         printer.info("Task {} added successfully", task.getCode());
     }
 
     private Task createTask() {
         Task task = new Task();
         task.setCode(code);
-        task.setState(getTaskState());
+        task.setState(TaskState.WAITING);
         return task;
-    }
-
-    private TaskState getTaskState() {
-        if (startImmediately) {
-            return TaskState.IN_PROGRESS;
-        }
-        return TaskState.WAITING;
     }
 }
