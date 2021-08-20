@@ -4,19 +4,12 @@ import dev.maxuz.ttcli.model.Task;
 import dev.maxuz.ttcli.model.TaskState;
 import dev.maxuz.ttcli.printer.Printer;
 import dev.maxuz.ttcli.service.TaskService;
-import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.ArgumentCaptor;
 
-import java.time.Instant;
-import java.time.LocalDateTime;
-import java.util.stream.Stream;
-
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 
 class AddCommandTest {
     private final TaskService taskService = mock(TaskService.class);
@@ -43,7 +36,6 @@ class AddCommandTest {
         command.setStartImmediately(true);
 
         command.run();
-
 
         ArgumentCaptor<Task> taskArgumentCaptor = ArgumentCaptor.forClass(Task.class);
         verify(taskService).addTask(taskArgumentCaptor.capture());
