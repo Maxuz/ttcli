@@ -56,12 +56,12 @@ public class FileTaskDataProvider implements TaskDataProvider {
 
     private FileStorageTO getFileStorageTO() {
         try {
-            String fileContent = Files.readString(storage);
+            List<String> fileContent = Files.readAllLines(storage);
             FileStorageTO storageTO;
-            if (fileContent.length() == 0) {
+            if (fileContent.isEmpty()) {
                 storageTO = null;
             } else {
-                storageTO = objectMapper.readValue(fileContent, FileStorageTO.class);
+                storageTO = objectMapper.readValue(String.join("\n", fileContent), FileStorageTO.class);
             }
             return storageTO;
         } catch (IOException e) {

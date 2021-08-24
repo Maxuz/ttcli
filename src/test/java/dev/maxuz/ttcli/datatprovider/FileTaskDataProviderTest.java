@@ -29,6 +29,20 @@ class FileTaskDataProviderTest {
     private static final Path STORAGE_DIR = Paths.get("./temp-storage/");
     private static final TaskConverter taskConverter = mock(TaskConverter.class);
 
+    private void write(Path path, String sourceFilePath) throws URISyntaxException, IOException {
+        Files.write(path, Files.readAllLines(getPathFromResource(sourceFilePath)));
+    }
+
+    private Path getPathFromResource(String fileName) throws URISyntaxException {
+        ClassLoader classLoader = getClass().getClassLoader();
+        URL resource = classLoader.getResource(fileName);
+        if (resource == null) {
+            throw new IllegalArgumentException("File not found! " + fileName);
+        } else {
+            return Paths.get(resource.toURI());
+        }
+    }
+
     @BeforeAll
     static void beforeAll() throws IOException {
         if (Files.exists(STORAGE_DIR)) {
@@ -63,16 +77,6 @@ class FileTaskDataProviderTest {
         }
     }
 
-    private Path getPathFromResource(String fileName) throws URISyntaxException {
-        ClassLoader classLoader = getClass().getClassLoader();
-        URL resource = classLoader.getResource(fileName);
-        if (resource == null) {
-            throw new IllegalArgumentException("File not found! " + fileName);
-        } else {
-            return Paths.get(resource.toURI());
-        }
-    }
-
     @Test
     void saveTask_EmptyFile_TaskSaved() throws Exception {
         Path storage = createTempStorage();
@@ -93,7 +97,8 @@ class FileTaskDataProviderTest {
     @Test
     void saveTask_FileIsNotEmpty_TaskSavedSourceContentKept() throws Exception {
         Path storage = createTempStorage();
-        Files.writeString(storage, contentOf(getPathFromResource("filestorage/new_task.json").toFile()));
+
+        write(storage, "filestorage/new_task.json");
         FileTaskDataProvider dataProvider = new FileTaskDataProvider(new FileDataProviderConfig(storage), taskConverter);
 
         TaskTO task = new TaskTO();
@@ -111,7 +116,7 @@ class FileTaskDataProviderTest {
     @Test
     void saveTask_UpdateTask_TaskUpdated() throws Exception {
         Path storage = createTempStorage();
-        Files.writeString(storage, contentOf(getPathFromResource("filestorage/one_is_waiting_another_one_is_in_progress.json").toFile()));
+        write(storage,"filestorage/one_is_waiting_another_one_is_in_progress.json");
         FileTaskDataProvider dataProvider = new FileTaskDataProvider(new FileDataProviderConfig(storage), taskConverter);
 
         TaskTO taskTO = new TaskTO();
@@ -139,7 +144,7 @@ class FileTaskDataProviderTest {
             .thenReturn(expected);
 
         Path storage = createTempStorage();
-        Files.writeString(storage, contentOf(getPathFromResource("filestorage/one_is_waiting_another_one_is_in_progress.json").toFile()));
+        write(storage, "filestorage/one_is_waiting_another_one_is_in_progress.json");
         FileTaskDataProvider dataProvider = new FileTaskDataProvider(new FileDataProviderConfig(storage), taskConverter);
 
         assertThat(dataProvider.getTaskInProgress()).isSameAs(expected);
@@ -148,7 +153,7 @@ class FileTaskDataProviderTest {
     @Test
     void getTaskInProgress_TaskDoesNotExist_ReturnNull() throws Exception {
         Path storage = createTempStorage();
-        Files.writeString(storage, contentOf(getPathFromResource("filestorage/two_tasks_waiting.json").toFile()));
+        write(storage, "filestorage/two_tasks_waiting.json");
         FileTaskDataProvider dataProvider = new FileTaskDataProvider(new FileDataProviderConfig(storage), taskConverter);
 
         assertThat(dataProvider.getTaskInProgress()).isNull();
@@ -163,7 +168,7 @@ class FileTaskDataProviderTest {
             .thenReturn(task);
 
         Path storage = createTempStorage();
-        Files.writeString(storage, contentOf(getPathFromResource("filestorage/new_task.json").toFile()));
+        write(storage, "filestorage/new_task.json");
         FileTaskDataProvider dataProvider = new FileTaskDataProvider(new FileDataProviderConfig(storage), taskConverter);
 
         assertThat(dataProvider.getTasks()).isEqualTo(Collections.singletonList(task));
