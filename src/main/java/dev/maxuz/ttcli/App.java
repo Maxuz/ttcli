@@ -28,6 +28,13 @@ public class App implements CommandLineRunner {
     public void run(String... args) {
         CommandLine commandLine = new CommandLine(new MainCommand());
         subCommands.forEach(commandLine::addSubcommand);
+        CommandLine.IExecutionExceptionHandler errorHandler = (ex, cl, parseResult) -> {
+            log.error("Error: {}\n", ex.getMessage());
+            log.debug(ex.getMessage(), ex);
+            cl.usage(cl.getErr());
+            return cl.getCommandSpec().exitCodeOnExecutionException();
+        };
+        commandLine.setExecutionExceptionHandler(errorHandler);
         int exitCode = commandLine.execute(args);
         System.exit(exitCode);
     }
