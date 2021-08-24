@@ -1,5 +1,6 @@
 package dev.maxuz.ttcli.config;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -13,19 +14,11 @@ import java.time.format.DateTimeFormatter;
 @Configuration
 public class AppConfiguration {
     @Bean
-    public FileDataProviderConfig fileDataProviderConfig() throws IOException {
-        Path storage = createStorage();
-        return new FileDataProviderConfig(storage);
-    }
-
-    private Path createStorage() throws IOException {
-        String storagePath = "./storage/";
-        Path storageDir = Paths.get(storagePath);
-        Files.createDirectories(storageDir);
-        Path storage = Paths.get(storagePath + LocalDate.now().format(DateTimeFormatter.ISO_DATE) + ".json");
+    public FileDataProviderConfig fileDataProviderConfig(@Value("${storage.path}") String path) throws IOException {
+        Path storage = Paths.get(path);
         if (!Files.exists(storage)) {
             Files.createFile(storage);
         }
-        return storage;
+        return new FileDataProviderConfig(storage);
     }
 }
