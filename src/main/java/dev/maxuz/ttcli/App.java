@@ -10,6 +10,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import picocli.CommandLine;
 
 import java.util.List;
+import java.util.stream.Stream;
 
 @Slf4j
 @SpringBootApplication(scanBasePackages = "dev.maxuz.ttcli")
@@ -35,7 +36,11 @@ public class App implements CommandLineRunner {
             return cl.getCommandSpec().exitCodeOnExecutionException();
         };
         commandLine.setExecutionExceptionHandler(errorHandler);
-        int exitCode = commandLine.execute(args);
+        int exitCode = commandLine.execute(filterOut(args));
         System.exit(exitCode);
+    }
+
+    private String[] filterOut(String[] args) {
+        return Stream.of(args).filter(v -> !v.startsWith("--spring")).toArray(String[]::new);
     }
 }
