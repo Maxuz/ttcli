@@ -8,6 +8,7 @@ import dev.maxuz.ttcli.model.Task;
 import dev.maxuz.ttcli.model.TaskState;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import java.time.Instant;
 import java.util.List;
@@ -68,7 +69,31 @@ public class TaskServiceImpl implements TaskService {
 
     @Override
     public Task getTask(String code) {
-        return getTasksAsMap().get(code);
+        if (StringUtils.isEmpty(code)) {
+            throw new TtRuntimeException("The task code can't be empty");
+        }
+        Map<String, Task> tasks = getTasksAsMap();
+        if (tasks.containsKey(code)) {
+            return tasks.get(code);
+        }
+        if (tasks.containsKey(code.toLowerCase())) {
+            return tasks.get(code.toLowerCase());
+        }
+
+        if (tasks.containsKey(code.toUpperCase())) {
+            return tasks.get(code.toUpperCase());
+        }
+        List<String> foundTasks = tasks.keySet().stream()
+            .filter(tCode -> tCode.toLowerCase().contains(code.toLowerCase()))
+            .collect(Collectors.toList());
+        if (foundTasks.isEmpty()) {
+            return null;
+        }
+        if (foundTasks.size() == 1) {
+            return tasks.get(foundTasks.get(0));
+        } else {
+            throw new TtRuntimeException("Found more than one task for code [" + code + "]");
+        }
     }
 
     @Override
