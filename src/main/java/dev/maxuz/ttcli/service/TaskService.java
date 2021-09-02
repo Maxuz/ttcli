@@ -51,6 +51,11 @@ public interface TaskService {
     List<Task> getTasks();
 
     /**
+     * Remove all tasks
+     */
+    void clean();
+
+    /**
      * Added time to the task
      * @param task to add time
      * @param time to add in milliseconds

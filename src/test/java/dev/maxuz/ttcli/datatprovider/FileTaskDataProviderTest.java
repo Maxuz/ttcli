@@ -116,7 +116,7 @@ class FileTaskDataProviderTest {
     @Test
     void saveTask_UpdateTask_TaskUpdated() throws Exception {
         Path storage = createTempStorage();
-        write(storage,"filestorage/one_is_waiting_another_one_is_in_progress.json");
+        write(storage, "filestorage/one_is_waiting_another_one_is_in_progress.json");
         FileTaskDataProvider dataProvider = new FileTaskDataProvider(new FileDataProviderConfig(storage), taskConverter);
 
         TaskTO taskTO = new TaskTO();
@@ -172,5 +172,15 @@ class FileTaskDataProviderTest {
         FileTaskDataProvider dataProvider = new FileTaskDataProvider(new FileDataProviderConfig(storage), taskConverter);
 
         assertThat(dataProvider.getTasks()).isEqualTo(Collections.singletonList(task));
+    }
+
+    @Test
+    void clean() throws Exception {
+        Path storage = createTempStorage();
+        write(storage, "filestorage/two_tasks_waiting.json");
+        FileTaskDataProvider dataProvider = new FileTaskDataProvider(new FileDataProviderConfig(storage), taskConverter);
+        dataProvider.clean();
+
+        assertThat(contentOf(storage.toFile())).isEqualTo("{\n  \"tasks\" : [ ]\n}");
     }
 }

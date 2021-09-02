@@ -119,6 +119,11 @@ public class TaskServiceImpl implements TaskService {
     }
 
     @Override
+    public void clean() {
+        taskDataProvider.clean();
+    }
+
+    @Override
     public void addTime(Task task, long time) {
         task.setTimeSpent(task.getTimeSpent() + time);
         taskDataProvider.saveTask(task);
