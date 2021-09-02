@@ -46,7 +46,7 @@ public class AddCommand implements SubCommand, Runnable {
             taskService.stopCurrent();
             taskService.start(task);
         }
-        printer.info("Task {} added successfully", task.getCode());
+        printer.info("Task {} added", task.getCode());
     }
 
     private Task createTask() {

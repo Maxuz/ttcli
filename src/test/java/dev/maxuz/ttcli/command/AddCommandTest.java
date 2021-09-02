@@ -42,6 +42,6 @@ class AddCommandTest {
         Task task = taskArgumentCaptor.getValue();
         verify(taskService).stopCurrent();
         verify(taskService).start(task);
-        verify(printer).info("Task {} added successfully", "TASK_CODE");
+        verify(printer).info("Task {} added", "TASK_CODE");
     }
 }
