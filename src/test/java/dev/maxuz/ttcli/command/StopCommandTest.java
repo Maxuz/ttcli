@@ -20,7 +20,7 @@ class StopCommandTest {
 
     private Task createTask(String code) {
         Task task = new Task();
-        task.setCode(code);
+        task.setName(code);
         task.setState(TaskState.IN_PROGRESS);
         return task;
     }
@@ -33,7 +33,7 @@ class StopCommandTest {
             .thenReturn(task);
 
         StopCommand stopCommand = new StopCommand(taskService, printer);
-        stopCommand.setCode("Code 1");
+        stopCommand.setName("Code 1");
 
         stopCommand.run();
 
@@ -47,10 +47,10 @@ class StopCommandTest {
             .thenReturn(null);
 
         StopCommand command = new StopCommand(taskService, printer);
-        command.setCode("TASK_CODE");
+        command.setName("TASK_CODE");
 
         TtRuntimeException exception = assertThrows(TtRuntimeException.class, command::run);
-        assertThat(exception.getMessage()).isEqualTo("Task with code [TASK_CODE] is not found");
+        assertThat(exception.getMessage()).isEqualTo("Task with name [TASK_CODE] is not found");
 
         verify(taskService, times(0)).stop(any());
     }
@@ -69,8 +69,8 @@ class StopCommandTest {
         ArgumentCaptor<Task> taskArgumentCaptor = ArgumentCaptor.forClass(Task.class);
         verify(taskService, times(2)).stop(taskArgumentCaptor.capture());
         assertThat(taskArgumentCaptor.getAllValues().size()).isEqualTo(2);
-        assertThat(taskArgumentCaptor.getAllValues().get(0).getCode()).isEqualTo("Code 1");
-        assertThat(taskArgumentCaptor.getAllValues().get(1).getCode()).isEqualTo("Code 2");
+        assertThat(taskArgumentCaptor.getAllValues().get(0).getName()).isEqualTo("Code 1");
+        assertThat(taskArgumentCaptor.getAllValues().get(1).getName()).isEqualTo("Code 2");
 
         ArgumentCaptor<String> taskCodeArgumentCaptor = ArgumentCaptor.forClass(String.class);
         verify(printer, times(2)).info(eq("Task {} stopped"), taskCodeArgumentCaptor.capture());

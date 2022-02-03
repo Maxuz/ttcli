@@ -24,13 +24,13 @@ class StartCommandTest {
     void startTask_TaskExists_StartTaskCalled() {
         Task task = new Task();
         task.setState(TaskState.WAITING);
-        task.setCode("TASK_CODE");
+        task.setName("TASK_CODE");
 
         when(taskService.getTask("TASK_CODE"))
             .thenReturn(task);
 
         StartCommand command = new StartCommand(taskService, printer);
-        command.setCode(task.getCode());
+        command.setName(task.getName());
 
         command.run();
 
@@ -44,10 +44,10 @@ class StartCommandTest {
             .thenReturn(null);
 
         StartCommand command = new StartCommand(taskService, printer);
-        command.setCode("TASK_CODE");
+        command.setName("TASK_CODE");
 
         TtRuntimeException exception = assertThrows(TtRuntimeException.class, command::run);
-        assertThat(exception.getMessage()).isEqualTo("Task with code [TASK_CODE] is not found");
+        assertThat(exception.getMessage()).isEqualTo("Task with name [TASK_CODE] is not found");
 
         verify(taskService, times(0)).start(any());
     }
@@ -66,7 +66,7 @@ class StartCommandTest {
             .thenReturn(new Task());
 
         StartCommand command = new StartCommand(taskService, printer);
-        command.setCode("TASK_CODE");
+        command.setName("TASK_CODE");
         command.setStopOthers(stopOthers);
 
         command.run();

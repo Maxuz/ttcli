@@ -83,7 +83,7 @@ class FileTaskDataProviderTest {
         FileTaskDataProvider dataProvider = new FileTaskDataProvider(new FileDataProviderConfig(storage), taskConverter);
 
         TaskTO task = new TaskTO();
-        task.setCode("NEW_TASK_CODE");
+        task.setName("NEW_TASK_CODE");
         task.setState(TaskStateTO.IN_PROGRESS);
         when(taskConverter.convert(any(Task.class)))
             .thenReturn(task);
@@ -102,7 +102,7 @@ class FileTaskDataProviderTest {
         FileTaskDataProvider dataProvider = new FileTaskDataProvider(new FileDataProviderConfig(storage), taskConverter);
 
         TaskTO task = new TaskTO();
-        task.setCode("SECOND_TASK");
+        task.setName("SECOND_TASK");
         task.setState(TaskStateTO.WAITING);
         when(taskConverter.convert(any(Task.class)))
             .thenReturn(task);
@@ -120,11 +120,11 @@ class FileTaskDataProviderTest {
         FileTaskDataProvider dataProvider = new FileTaskDataProvider(new FileDataProviderConfig(storage), taskConverter);
 
         TaskTO taskTO = new TaskTO();
-        taskTO.setCode("NEW_TASK_CODE");
+        taskTO.setName("NEW_TASK_CODE");
         taskTO.setState(TaskStateTO.WAITING);
 
         Task taskToChange = new Task();
-        taskToChange.setCode("NEW_TASK_CODE");
+        taskToChange.setName("NEW_TASK_CODE");
         taskToChange.setState(TaskState.IN_PROGRESS);
 
         when(taskConverter.convert(any(Task.class)))
@@ -162,7 +162,7 @@ class FileTaskDataProviderTest {
     @Test
     void getTasks() throws Exception {
         Task task = new Task();
-        task.setCode("NEW_TASK_CODE");
+        task.setName("NEW_TASK_CODE");
         task.setState(TaskState.WAITING);
         when(taskConverter.convert(any(TaskTO.class)))
             .thenReturn(task);

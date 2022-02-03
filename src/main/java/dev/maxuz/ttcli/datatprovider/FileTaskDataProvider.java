@@ -30,7 +30,7 @@ public class FileTaskDataProvider implements TaskDataProvider {
     @Override
     public void saveTask(Task task) {
         Map<String, TaskTO> taskMap = getTaskMap();
-        taskMap.put(task.getCode(), taskConverter.convert(task));
+        taskMap.put(task.getName(), taskConverter.convert(task));
         write(taskMap.values());
     }
 
@@ -51,7 +51,7 @@ public class FileTaskDataProvider implements TaskDataProvider {
             return new HashMap<>();
         }
         return storageTO.getTasks().stream()
-            .collect(Collectors.toMap(TaskTO::getCode, t -> t));
+            .collect(Collectors.toMap(TaskTO::getName, t -> t));
     }
 
     private FileStorageTO getFileStorageTO() {

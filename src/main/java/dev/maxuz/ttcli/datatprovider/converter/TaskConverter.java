@@ -17,7 +17,7 @@ public class TaskConverter {
             return null;
         }
         TaskTO task = new TaskTO();
-        task.setCode(source.getCode());
+        task.setName(source.getName());
         task.setState(taskStateConverter.convert(source.getState()));
         task.setTimeSpent(source.getTimeSpent());
         task.setStartTime(source.getStartTime());
@@ -29,7 +29,7 @@ public class TaskConverter {
             return null;
         }
         Task task = new Task();
-        task.setCode(source.getCode());
+        task.setName(source.getName());
         task.setState(taskStateConverter.convert(source.getState()));
         task.setTimeSpent(source.getTimeSpent());
         task.setStartTime(source.getStartTime());

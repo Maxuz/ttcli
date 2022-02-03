@@ -18,21 +18,21 @@ class AddCommandTest {
     @Test
     void addTask() {
         AddCommand command = new AddCommand(taskService, printer);
-        command.setCode("TASK_CODE");
+        command.setName("TASK_CODE");
 
         command.run();
 
         ArgumentCaptor<Task> taskArgumentCaptor = ArgumentCaptor.forClass(Task.class);
         verify(taskService).addTask(taskArgumentCaptor.capture());
         Task task = taskArgumentCaptor.getValue();
-        assertThat(task.getCode()).isEqualTo("TASK_CODE");
+        assertThat(task.getName()).isEqualTo("TASK_CODE");
         assertThat(task.getState()).isEqualTo(TaskState.WAITING);
     }
 
     @Test
     void addTask_StartImmediatelyIsTrue() {
         AddCommand command = new AddCommand(taskService, printer);
-        command.setCode("TASK_CODE");
+        command.setName("TASK_CODE");
         command.setStartImmediately(true);
 
         command.run();

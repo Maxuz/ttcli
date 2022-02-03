@@ -1,6 +1,6 @@
 {
   "tasks" : [ {
-    "code" : "NEW_TASK_CODE",
+    "name" : "NEW_TASK_CODE",
     "state" : "IN_PROGRESS",
     "timeSpent" : 0
   } ]

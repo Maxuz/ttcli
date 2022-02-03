@@ -22,11 +22,11 @@ public class AddCommand implements SubCommand, Runnable {
     }
 
     // parameters
-    private String code;
+    private String name;
 
-    @Parameters(index = "0", description = "Code of a task to create. This code you will be use to manage the task")
-    public void setCode(String code) {
-        this.code = code;
+    @Parameters(index = "0", description = "Name of a task to create. This name you will be use to manage the task")
+    public void setName(String name) {
+        this.name = name;
     }
 
     // options
@@ -46,12 +46,12 @@ public class AddCommand implements SubCommand, Runnable {
             taskService.stopCurrent();
             taskService.start(task);
         }
-        printer.info("Task {} added", task.getCode());
+        printer.info("Task {} added", task.getName());
     }
 
     private Task createTask() {
         Task task = new Task();
-        task.setCode(code);
+        task.setName(name);
         task.setState(TaskState.WAITING);
         return task;
     }

@@ -9,9 +9,9 @@ import lombok.NoArgsConstructor;
 @Data
 public class Task {
     /**
-     * Unique identifier of this task
+     * Unique name of this task
      */
-    private String code;
+    private String name;
 
     /**
      * Task state
@@ -24,9 +24,9 @@ public class Task {
     private long timeSpent;
 
     /**
-     * This time must be not null only if the {@code state} = {@code TaskState.IN_PROGRESS}.
-     * This time is necessary for calculating total time and {@code timeSpent} when you stop this task.
-     * The total time spent on this task = (now - {@code startTime} + {@code timeSpent}.
+     * This time must be not null only if the {@name state} = {@name TaskState.IN_PROGRESS}.
+     * This time is necessary for calculating total time and {@name timeSpent} when you stop this task.
+     * The total time spent on this task = (now - {@name startTime} + {@name timeSpent}.
      */
     private Long startTime;
 

@@ -27,14 +27,14 @@ public class TaskServiceImpl implements TaskService {
 
     private Map<String, Task> getTasksAsMap() {
         return taskDataProvider.getTasks().stream()
-            .collect(Collectors.toMap(Task::getCode, t -> t));
+            .collect(Collectors.toMap(Task::getName, t -> t));
     }
 
     @Override
     public void addTask(Task task) {
         Map<String, Task> tasks = getTasksAsMap();
-        if (tasks.containsKey(task.getCode())) {
-            throw new TtRuntimeException("Task with code [" + task.getCode() + "] is already exists");
+        if (tasks.containsKey(task.getName())) {
+            throw new TtRuntimeException("Task with name [" + task.getName() + "] is already exists");
         }
         taskDataProvider.saveTask(task);
     }
@@ -54,7 +54,7 @@ public class TaskServiceImpl implements TaskService {
         long now = Instant.now().toEpochMilli();
 
         if (task.getState() == TaskState.WAITING) {
-            throw new TtRuntimeException("Task with code [" + task.getCode() + "] is not started");
+            throw new TtRuntimeException("Task with name [" + task.getName() + "] is not started");
         }
         if (task.getStartTime() == null) {
             throw new TtInternalException("Internal error. Start time is empty");
@@ -68,23 +68,23 @@ public class TaskServiceImpl implements TaskService {
     }
 
     @Override
-    public Task getTask(String code) {
-        if (StringUtils.isEmpty(code)) {
-            throw new TtRuntimeException("The task code can't be empty");
+    public Task getTask(String name) {
+        if (StringUtils.isEmpty(name)) {
+            throw new TtRuntimeException("The task name can't be empty");
         }
         Map<String, Task> tasks = getTasksAsMap();
-        if (tasks.containsKey(code)) {
-            return tasks.get(code);
+        if (tasks.containsKey(name)) {
+            return tasks.get(name);
         }
-        if (tasks.containsKey(code.toLowerCase())) {
-            return tasks.get(code.toLowerCase());
+        if (tasks.containsKey(name.toLowerCase())) {
+            return tasks.get(name.toLowerCase());
         }
 
-        if (tasks.containsKey(code.toUpperCase())) {
-            return tasks.get(code.toUpperCase());
+        if (tasks.containsKey(name.toUpperCase())) {
+            return tasks.get(name.toUpperCase());
         }
         List<String> foundTasks = tasks.keySet().stream()
-            .filter(tCode -> tCode.toLowerCase().contains(code.toLowerCase()))
+            .filter(tName -> tName.toLowerCase().contains(name.toLowerCase()))
             .collect(Collectors.toList());
         if (foundTasks.isEmpty()) {
             return null;
@@ -92,7 +92,7 @@ public class TaskServiceImpl implements TaskService {
         if (foundTasks.size() == 1) {
             return tasks.get(foundTasks.get(0));
         } else {
-            throw new TtRuntimeException("Found more than one task for code [" + code + "]");
+            throw new TtRuntimeException("Found more than one task for name [" + name + "]");
         }
     }
 
@@ -106,7 +106,7 @@ public class TaskServiceImpl implements TaskService {
     @Override
     public void start(Task task) {
         if (task.getState() == TaskState.IN_PROGRESS) {
-            throw new TtWarningException("Task with code [" + task.getCode() + "] is already started");
+            throw new TtWarningException("Task with name [" + task.getName() + "] is already started");
         }
         task.setState(TaskState.IN_PROGRESS);
         task.setStartTime(Instant.now().toEpochMilli());

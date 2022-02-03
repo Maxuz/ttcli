@@ -30,9 +30,9 @@ class TaskServiceImplTest {
 
     private final TaskServiceImpl service = new TaskServiceImpl(taskDataProvider);
 
-    private static Task createTask(String code) {
+    private static Task createTask(String name) {
         Task task = new Task();
-        task.setCode(code);
+        task.setName(name);
         return task;
     }
 
@@ -52,7 +52,7 @@ class TaskServiceImplTest {
 
         assertThatThrownBy(() -> service.addTask(task))
             .isInstanceOf(TtRuntimeException.class)
-            .hasMessage("Task with code [THE_SAME_CODE] is already exists");
+            .hasMessage("Task with name [THE_SAME_CODE] is already exists");
     }
 
     @Test
@@ -72,7 +72,7 @@ class TaskServiceImplTest {
         verify(taskDataProvider).saveTask(taskArgumentCaptor.capture());
 
         Task actualTask = taskArgumentCaptor.getValue();
-        assertThat(actualTask.getCode()).isEqualTo("Code 1");
+        assertThat(actualTask.getName()).isEqualTo("Code 1");
         assertThat(actualTask.getState()).isEqualTo(TaskState.WAITING);
         assertThat(actualTask.getStartTime()).isNull();
         assertThat(actualTask.getTimeSpent()).isCloseTo(3600000L, Offset.offset(999L));
@@ -109,14 +109,14 @@ class TaskServiceImplTest {
 
     @ParameterizedTest
     @MethodSource("getTaskSource_Positive")
-    void getTask_Positive(List<Task> tasks, String code, Task expected) {
+    void getTask_Positive(List<Task> tasks, String name, Task expected) {
         when(taskDataProvider.getTasks())
             .thenReturn(tasks);
 
         if (expected == null) {
-            assertThat(service.getTask(code)).isNull();
+            assertThat(service.getTask(name)).isNull();
         } else {
-            assertThat(service.getTask(code)).isEqualTo(expected);
+            assertThat(service.getTask(name)).isEqualTo(expected);
         }
     }
 
@@ -126,7 +126,7 @@ class TaskServiceImplTest {
             .thenReturn(Arrays.asList(createTask("A-1"), createTask("A-2")));
 
         TtRuntimeException exception = assertThrows(TtRuntimeException.class, () -> service.getTask("A"));
-        assertThat(exception.getMessage()).isEqualTo("Found more than one task for code [A]");
+        assertThat(exception.getMessage()).isEqualTo("Found more than one task for name [A]");
     }
 
     @Test
@@ -135,7 +135,7 @@ class TaskServiceImplTest {
             .thenReturn(Arrays.asList(createTask("A-1"), createTask("A-2")));
 
         TtRuntimeException exception = assertThrows(TtRuntimeException.class, () -> service.getTask(null));
-        assertThat(exception.getMessage()).isEqualTo("The task code can't be empty");
+        assertThat(exception.getMessage()).isEqualTo("The task name can't be empty");
     }
 
     @Test
@@ -144,7 +144,7 @@ class TaskServiceImplTest {
             .thenReturn(Arrays.asList(createTask("A-1"), createTask("A-2")));
 
         TtRuntimeException exception = assertThrows(TtRuntimeException.class, () -> service.getTask(null));
-        assertThat(exception.getMessage()).isEqualTo("The task code can't be empty");
+        assertThat(exception.getMessage()).isEqualTo("The task name can't be empty");
     }
 
     @Test
@@ -164,7 +164,7 @@ class TaskServiceImplTest {
         verify(taskDataProvider).saveTask(taskArgumentCaptor.capture());
 
         Task actualTask = taskArgumentCaptor.getValue();
-        assertThat(actualTask.getCode()).isEqualTo("Code 1");
+        assertThat(actualTask.getName()).isEqualTo("Code 1");
         assertThat(actualTask.getState()).isEqualTo(TaskState.WAITING);
         assertThat(actualTask.getStartTime()).isNull();
         assertThat(actualTask.getTimeSpent()).isCloseTo(3600000L, Offset.offset(999L));
@@ -180,7 +180,7 @@ class TaskServiceImplTest {
         ArgumentCaptor<Task> taskArgumentCaptor = ArgumentCaptor.forClass(Task.class);
         verify(taskDataProvider).saveTask(taskArgumentCaptor.capture());
         Task actualTask = taskArgumentCaptor.getValue();
-        assertThat(actualTask.getCode()).isEqualTo("Code 1");
+        assertThat(actualTask.getName()).isEqualTo("Code 1");
         assertThat(actualTask.getState()).isEqualTo(TaskState.IN_PROGRESS);
         assertThat(actualTask.getStartTime()).isCloseTo(Instant.now().toEpochMilli(), Offset.offset(100L));
     }
@@ -191,7 +191,7 @@ class TaskServiceImplTest {
         sourceTask.setState(TaskState.IN_PROGRESS);
 
         TtWarningException exception = assertThrows(TtWarningException.class, () -> service.start(sourceTask));
-        assertThat(exception.getMessage()).isEqualTo("Task with code [Code 1] is already started");
+        assertThat(exception.getMessage()).isEqualTo("Task with name [Code 1] is already started");
 
         verify(taskDataProvider, times(0)).saveTask(any());
     }
@@ -210,7 +210,7 @@ class TaskServiceImplTest {
         verify(taskDataProvider).saveTask(taskArgumentCaptor.capture());
 
         Task actualTask = taskArgumentCaptor.getValue();
-        assertThat(actualTask.getCode()).isEqualTo("Code 1");
+        assertThat(actualTask.getName()).isEqualTo("Code 1");
         assertThat(actualTask.getState()).isEqualTo(TaskState.WAITING);
         assertThat(actualTask.getStartTime()).isNull();
         assertThat(actualTask.getTimeSpent()).isCloseTo(3600000L, Offset.offset(999L));
@@ -230,7 +230,7 @@ class TaskServiceImplTest {
         verify(taskDataProvider).saveTask(taskArgumentCaptor.capture());
 
         Task actualTask = taskArgumentCaptor.getValue();
-        assertThat(actualTask.getCode()).isEqualTo("Code 1");
+        assertThat(actualTask.getName()).isEqualTo("Code 1");
         assertThat(actualTask.getState()).isEqualTo(TaskState.WAITING);
         assertThat(actualTask.getStartTime()).isNull();
         assertThat(actualTask.getTimeSpent()).isCloseTo(1200000L, Offset.offset(999L));
@@ -243,7 +243,7 @@ class TaskServiceImplTest {
         sourceTask.setStartTime(Instant.now().toEpochMilli());
 
         TtRuntimeException exception = assertThrows(TtRuntimeException.class, () -> service.stop(sourceTask));
-        assertThat(exception.getMessage()).isEqualTo("Task with code [Code 1] is not started");
+        assertThat(exception.getMessage()).isEqualTo("Task with name [Code 1] is not started");
 
         verify(taskDataProvider, times(0)).saveTask(any());
     }

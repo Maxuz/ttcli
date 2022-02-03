@@ -30,7 +30,7 @@ public class Printer {
             if (task.getStartTime() != null) {
                 taskTime += Instant.now().toEpochMilli() - task.getStartTime();
             }
-            log.info("{}\tstate: {}\ttime: {}", task.getCode(), task.getState(), timeConverter.convert(taskTime));
+            log.info("{}\tstate: {}\ttime: {}", task.getName(), task.getState(), timeConverter.convert(taskTime));
             totalTime += taskTime;
         }
         log.info("\n=================");

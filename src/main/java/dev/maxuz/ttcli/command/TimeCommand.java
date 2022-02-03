@@ -2,12 +2,10 @@ package dev.maxuz.ttcli.command;
 
 import dev.maxuz.ttcli.exception.TtRuntimeException;
 import dev.maxuz.ttcli.model.Task;
-import dev.maxuz.ttcli.model.TaskState;
 import dev.maxuz.ttcli.printer.Printer;
 import dev.maxuz.ttcli.service.TaskService;
 import org.springframework.stereotype.Component;
 import picocli.CommandLine.Command;
-import picocli.CommandLine.Option;
 import picocli.CommandLine.Parameters;
 
 @Component
@@ -24,11 +22,11 @@ public class TimeCommand implements SubCommand {
     }
 
     // parameters
-    private String code;
+    private String name;
 
-    @Parameters(index = "0", description = "Code of a task to manage.")
-    public void setCode(String code) {
-        this.code = code;
+    @Parameters(index = "0", description = "Name of a task to manage.")
+    public void setName(String name) {
+        this.name = name;
     }
 
     @Command(name = "add", description = "Add time")
@@ -44,9 +42,9 @@ public class TimeCommand implements SubCommand {
     }
 
     private Task getTask() {
-        Task task = taskService.getTask(code);
+        Task task = taskService.getTask(name);
         if (task == null) {
-            throw new TtRuntimeException("Task with code [" + code + "] is not found");
+            throw new TtRuntimeException("Task with name [" + name + "] is not found");
         }
         return task;
     }

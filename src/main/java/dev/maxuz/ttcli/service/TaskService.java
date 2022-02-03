@@ -27,11 +27,11 @@ public interface TaskService {
     void stop(Task task);
 
     /**
-     * Find a task by code
-     * @param code of the task
+     * Find a task by name
+     * @param name of the task
      * @return task, or null
      */
-    Task getTask(String code);
+    Task getTask(String name);
 
     /**
      * Stops all the task with state IN_PROGRESS

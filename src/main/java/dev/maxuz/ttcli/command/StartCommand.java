@@ -22,11 +22,11 @@ public class StartCommand implements SubCommand, Runnable {
     }
 
     // parameters
-    private String code;
+    private String name;
 
-    @Parameters(index = "0", description = "Code of a task to start")
-    public void setCode(String code) {
-        this.code = code;
+    @Parameters(index = "0", description = "Name of a task to start")
+    public void setName(String name) {
+        this.name = name;
     }
 
     // options
@@ -39,9 +39,9 @@ public class StartCommand implements SubCommand, Runnable {
 
     @Override
     public void run() {
-        Task task = taskService.getTask(code);
+        Task task = taskService.getTask(name);
         if (task == null) {
-            throw new TtRuntimeException("Task with code [" + code + "] is not found");
+            throw new TtRuntimeException("Task with name [" + name + "] is not found");
         }
 
         if (stopOthers) {
@@ -49,6 +49,6 @@ public class StartCommand implements SubCommand, Runnable {
             printer.info("All tasks successfully stopped");
         }
         taskService.start(task);
-        printer.info("Task {} successfully started", task.getCode());
+        printer.info("Task {} successfully started", task.getName());
     }
 }

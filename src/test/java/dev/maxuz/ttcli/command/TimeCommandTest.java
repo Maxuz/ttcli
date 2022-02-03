@@ -41,12 +41,12 @@ class TimeCommandTest {
     @MethodSource("addTimeValidDataSource")
     void addTime_ValidData(String time, long expected) {
         Task task = new Task();
-        task.setCode("Task code");
+        task.setName("Task code");
 
         when(taskService.getTask("Task code")).thenReturn(task);
 
         TimeCommand command = new TimeCommand(taskService, printer);
-        command.setCode("Task code");
+        command.setName("Task code");
 
         command.add(time);
 
@@ -62,12 +62,12 @@ class TimeCommandTest {
     })
     void addTime_InvalidData_ThrowsException(String time) {
         Task task = new Task();
-        task.setCode("Task code");
+        task.setName("Task code");
 
         when(taskService.getTask("Task code")).thenReturn(task);
 
         TimeCommand command = new TimeCommand(taskService, printer);
-        command.setCode("Task code");
+        command.setName("Task code");
 
         TtRuntimeException exception = assertThrows(TtRuntimeException.class, () -> command.add(time));
         assertEquals("Invalid time format. Expected example 1h 32m 11s", exception.getMessage());
@@ -80,10 +80,10 @@ class TimeCommandTest {
         when(taskService.getTask(any())).thenReturn(null);
 
         TimeCommand command = new TimeCommand(taskService, printer);
-        command.setCode("NonExistedTask");
+        command.setName("NonExistedTask");
 
         TtRuntimeException exception = assertThrows(TtRuntimeException.class, () -> command.add("10s"));
-        assertEquals("Task with code [NonExistedTask] is not found", exception.getMessage());
+        assertEquals("Task with name [NonExistedTask] is not found", exception.getMessage());
 
         verify(taskService, times(0)).addTime(any(), anyLong());
     }
@@ -108,12 +108,12 @@ class TimeCommandTest {
     @MethodSource("subtractTimeValidDataSource")
     void subtractTime_ValidData(String time, long expected) {
         Task task = new Task();
-        task.setCode("Task code");
+        task.setName("Task code");
 
         when(taskService.getTask("Task code")).thenReturn(task);
 
         TimeCommand command = new TimeCommand(taskService, printer);
-        command.setCode("Task code");
+        command.setName("Task code");
 
         command.subtract(time);
 
@@ -129,12 +129,12 @@ class TimeCommandTest {
     })
     void subtractTime_InvalidData_ThrowsException(String time) {
         Task task = new Task();
-        task.setCode("Task code");
+        task.setName("Task code");
 
         when(taskService.getTask("Task code")).thenReturn(task);
 
         TimeCommand command = new TimeCommand(taskService, printer);
-        command.setCode("Task code");
+        command.setName("Task code");
 
         TtRuntimeException exception = assertThrows(TtRuntimeException.class, () -> command.subtract(time));
         assertEquals("Invalid time format. Expected example 1h 32m 11s", exception.getMessage());
@@ -147,10 +147,10 @@ class TimeCommandTest {
         when(taskService.getTask(any())).thenReturn(null);
 
         TimeCommand command = new TimeCommand(taskService, printer);
-        command.setCode("NonExistedTask");
+        command.setName("NonExistedTask");
 
         TtRuntimeException exception = assertThrows(TtRuntimeException.class, () -> command.subtract("10s"));
-        assertEquals("Task with code [NonExistedTask] is not found", exception.getMessage());
+        assertEquals("Task with name [NonExistedTask] is not found", exception.getMessage());
 
         verify(taskService, times(0)).subtractTime(any(), anyLong());
     }
