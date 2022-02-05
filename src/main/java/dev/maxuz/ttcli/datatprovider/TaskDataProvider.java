@@ -22,9 +22,4 @@ public interface TaskDataProvider {
      * @return all tasks
      */
     List<Task> getTasks();
-
-    /**
-     * Remove all tasks
-     */
-    void clean();
 }

@@ -269,12 +269,6 @@ class TaskServiceImplTest {
     }
 
     @Test
-    void clean() {
-        service.clean();
-        verify(taskDataProvider).clean();
-    }
-
-    @Test
     void addTime() {
         Task task = new Task();
         task.setTimeSpent(0);

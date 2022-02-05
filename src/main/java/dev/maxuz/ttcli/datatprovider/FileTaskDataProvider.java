@@ -92,9 +92,4 @@ public class FileTaskDataProvider implements TaskDataProvider {
             .map(taskConverter::convert)
             .collect(Collectors.toList());
     }
-
-    @Override
-    public void clean() {
-        write(Collections.emptyList());
-    }
 }

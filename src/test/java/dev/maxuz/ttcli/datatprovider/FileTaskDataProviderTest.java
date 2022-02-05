@@ -173,14 +173,4 @@ class FileTaskDataProviderTest {
 
         assertThat(dataProvider.getTasks()).isEqualTo(Collections.singletonList(task));
     }
-
-    @Test
-    void clean() throws Exception {
-        Path storage = createTempStorage();
-        write(storage, "filestorage/two_tasks_waiting.json");
-        FileTaskDataProvider dataProvider = new FileTaskDataProvider(new FileDataProviderConfig(storage), taskConverter);
-        dataProvider.clean();
-
-        assertThat(contentOf(storage.toFile())).isEqualTo("{\n  \"tasks\" : [ ]\n}");
-    }
 }
