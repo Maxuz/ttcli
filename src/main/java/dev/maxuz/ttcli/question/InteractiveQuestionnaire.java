@@ -11,4 +11,9 @@ public class InteractiveQuestionnaire {
         return startNewDay.askUser();
     }
 
+    public boolean createTask(String name) {
+        return new BooleanUserQuestion(consoleWrapper, "Task with name '" + name + "' doesn't exist. Would you like to create", true)
+            .askUser();
+    }
+
 }

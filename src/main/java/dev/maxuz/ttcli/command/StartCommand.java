@@ -3,7 +3,9 @@ package dev.maxuz.ttcli.command;
 import dev.maxuz.ttcli.exception.TtRuntimeException;
 import dev.maxuz.ttcli.model.Task;
 import dev.maxuz.ttcli.model.TaskDay;
+import dev.maxuz.ttcli.model.TaskState;
 import dev.maxuz.ttcli.printer.Printer;
+import dev.maxuz.ttcli.question.InteractiveQuestionnaire;
 import dev.maxuz.ttcli.service.TaskDayService;
 import dev.maxuz.ttcli.service.TaskService;
 import org.springframework.stereotype.Component;
@@ -18,11 +20,13 @@ public class StartCommand implements SubCommand, Runnable {
     private final TaskDayService taskDayService;
     private final TaskService taskService;
     private final Printer printer;
+    private final InteractiveQuestionnaire questionnaire;
 
-    public StartCommand(TaskDayService taskDayService, TaskService taskService, Printer printer) {
+    public StartCommand(TaskDayService taskDayService, TaskService taskService, Printer printer, InteractiveQuestionnaire questionnaire) {
         this.taskDayService = taskDayService;
         this.taskService = taskService;
         this.printer = printer;
+        this.questionnaire = questionnaire;
     }
 
     // parameters
@@ -49,7 +53,15 @@ public class StartCommand implements SubCommand, Runnable {
         }
         Task task = taskService.getTask(taskDay, name);
         if (task == null) {
-            throw new TtRuntimeException("Task with name [" + name + "] is not found");
+            boolean answer = questionnaire.createTask(name);
+            if (answer) {
+                task = createTask();
+                taskService.addTask(taskDay, task);
+                taskDayService.save(taskDay);
+                printer.info("Task [" + name + "] is created");
+            } else {
+                throw new TtRuntimeException("Task with name [" + name + "] is not found");
+            }
         }
 
         if (stopOthers) {
@@ -60,5 +72,12 @@ public class StartCommand implements SubCommand, Runnable {
 
         taskDayService.save(taskDay);
         printer.info("Task {} successfully started", task.getName());
+    }
+
+    private Task createTask() {
+        Task task = new Task();
+        task.setName(name);
+        task.setState(TaskState.IN_PROGRESS);
+        return task;
     }
 }

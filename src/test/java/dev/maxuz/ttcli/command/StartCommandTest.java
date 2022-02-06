@@ -5,6 +5,7 @@ import dev.maxuz.ttcli.model.Task;
 import dev.maxuz.ttcli.model.TaskDay;
 import dev.maxuz.ttcli.model.TaskState;
 import dev.maxuz.ttcli.printer.Printer;
+import dev.maxuz.ttcli.question.InteractiveQuestionnaire;
 import dev.maxuz.ttcli.service.TaskDayService;
 import dev.maxuz.ttcli.service.TaskService;
 import org.assertj.core.api.Assertions;
@@ -23,6 +24,7 @@ class StartCommandTest {
     private final TaskDayService taskDayService = mock(TaskDayService.class);
     private final TaskService taskService = mock(TaskService.class);
     private final Printer printer = mock(Printer.class);
+    private final InteractiveQuestionnaire questionnaire = mock(InteractiveQuestionnaire.class);
 
     private TaskDay getTaskDay() {
         return new TaskDay(LocalDate.now());
@@ -40,7 +42,7 @@ class StartCommandTest {
         when(taskService.getTask(taskDay, "TASK_CODE"))
             .thenReturn(task);
 
-        StartCommand command = new StartCommand(taskDayService, taskService, printer);
+        StartCommand command = new StartCommand(taskDayService, taskService, printer, questionnaire);
         command.setName(task.getName());
 
         command.run();
@@ -51,14 +53,36 @@ class StartCommandTest {
     }
 
     @Test
-    void startTask_TaskDoesNotExist_ThrowsException() {
+    void startTask_TaskDoesNotExistUserWantsToCreate_TaskCreated() {
         TaskDay taskDay = getTaskDay();
         when(taskDayService.getCurrentDay()).thenReturn(taskDay);
 
         when(taskService.getTask(taskDay, "TASK_CODE"))
             .thenReturn(null);
 
-        StartCommand command = new StartCommand(taskDayService, taskService, printer);
+        when(questionnaire.createTask("TASK_CODE")).thenReturn(true);
+
+        StartCommand command = new StartCommand(taskDayService, taskService, printer, questionnaire);
+        command.setName("TASK_CODE");
+
+        command.run();
+
+        verify(taskService, times(1)).addTask(any(), any());
+        verify(taskService, times(1)).start(any());
+        verify(taskDayService, times(2)).save(taskDay);
+    }
+
+    @Test
+    void startTask_TaskDoesNotExistUserDoesNotWantToCreate_ThrowsException() {
+        TaskDay taskDay = getTaskDay();
+        when(taskDayService.getCurrentDay()).thenReturn(taskDay);
+
+        when(taskService.getTask(taskDay, "TASK_CODE"))
+            .thenReturn(null);
+
+        when(questionnaire.createTask("TASK_CODE")).thenReturn(false);
+
+        StartCommand command = new StartCommand(taskDayService, taskService, printer, questionnaire);
         command.setName("TASK_CODE");
 
         assertThatThrownBy(command::run)
@@ -85,7 +109,7 @@ class StartCommandTest {
         when(taskService.getTask(taskDay, "TASK_CODE"))
             .thenReturn(new Task());
 
-        StartCommand command = new StartCommand(taskDayService, taskService, printer);
+        StartCommand command = new StartCommand(taskDayService, taskService, printer, questionnaire);
         command.setName("TASK_CODE");
         command.setStopOthers(stopOthers);
 
@@ -107,7 +131,7 @@ class StartCommandTest {
 
         when(taskDayService.getCurrentDay()).thenReturn(null);
 
-        StartCommand command = new StartCommand(taskDayService, taskService, printer);
+        StartCommand command = new StartCommand(taskDayService, taskService, printer, questionnaire);
         command.setName(task.getName());
 
         Assertions.assertThatThrownBy(command::run)
