@@ -1,11 +1,11 @@
 package dev.maxuz.ttcli.datatprovider;
 
 import dev.maxuz.ttcli.config.FileDataProviderConfig;
-import dev.maxuz.ttcli.datatprovider.converter.TaskConverter;
+import dev.maxuz.ttcli.datatprovider.converter.TaskDayConverter;
+import dev.maxuz.ttcli.datatprovider.dto.TaskDayTO;
 import dev.maxuz.ttcli.datatprovider.dto.TaskStateTO;
 import dev.maxuz.ttcli.datatprovider.dto.TaskTO;
-import dev.maxuz.ttcli.model.Task;
-import dev.maxuz.ttcli.model.TaskState;
+import dev.maxuz.ttcli.model.TaskDay;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -16,7 +16,9 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.LocalDate;
 import java.util.Collections;
+import java.util.List;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -25,9 +27,9 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-class FileTaskDataProviderTest {
+class FileTaskDayDataProviderTest {
     private static final Path STORAGE_DIR = Paths.get("./temp-storage/");
-    private static final TaskConverter taskConverter = mock(TaskConverter.class);
+    private static final TaskDayConverter taskDayConverter = mock(TaskDayConverter.class);
 
     private void write(Path path, String sourceFilePath) throws URISyntaxException, IOException {
         Files.write(path, Files.readAllLines(getPathFromResource(sourceFilePath)));
@@ -78,99 +80,84 @@ class FileTaskDataProviderTest {
     }
 
     @Test
-    void saveTask_EmptyFile_TaskSaved() throws Exception {
+    void saveTaskDay_EmptyFile_TaskDayIsSaved() throws Exception {
         Path storage = createTempStorage();
-        FileTaskDataProvider dataProvider = new FileTaskDataProvider(new FileDataProviderConfig(storage), taskConverter);
+        FileTaskDayDataProvider dataProvider = new FileTaskDayDataProvider(new FileDataProviderConfig(storage), taskDayConverter);
 
+        TaskDayTO day = new TaskDayTO();
+        day.setDate("2022-02-05");
         TaskTO task = new TaskTO();
         task.setName("NEW_TASK_CODE");
         task.setState(TaskStateTO.IN_PROGRESS);
-        when(taskConverter.convert(any(Task.class)))
-            .thenReturn(task);
+        day.setTasks(Collections.singletonList(task));
 
-        dataProvider.saveTask(new Task());
+        when(taskDayConverter.convert(any(TaskDay.class)))
+            .thenReturn(day);
 
-        String expected = contentOf(getPathFromResource("filestorage/new_task.json").toFile());
+        dataProvider.save(new TaskDay(LocalDate.parse("2022-02-05")));
+
+        String expected = contentOf(getPathFromResource("filestorage/single-day-single-task.json").toFile());
         assertThat(contentOf(storage.toFile())).isEqualTo(expected);
     }
 
     @Test
-    void saveTask_FileIsNotEmpty_TaskSavedSourceContentKept() throws Exception {
+    void saveTaskDay_FileIsNotEmpty_TaskDayIsSavedSourceContentIsKept() throws Exception {
         Path storage = createTempStorage();
 
-        write(storage, "filestorage/new_task.json");
-        FileTaskDataProvider dataProvider = new FileTaskDataProvider(new FileDataProviderConfig(storage), taskConverter);
+        write(storage, "filestorage/single-day-single-task.json");
+        FileTaskDayDataProvider dataProvider = new FileTaskDayDataProvider(new FileDataProviderConfig(storage), taskDayConverter);
 
+        TaskDayTO day = new TaskDayTO();
+        day.setDate("2022-02-06");
         TaskTO task = new TaskTO();
         task.setName("SECOND_TASK");
         task.setState(TaskStateTO.WAITING);
-        when(taskConverter.convert(any(Task.class)))
-            .thenReturn(task);
+        day.setTasks(Collections.singletonList(task));
 
-        dataProvider.saveTask(new Task());
+        when(taskDayConverter.convert(any(TaskDay.class)))
+            .thenReturn(day);
 
-        String expected = contentOf(getPathFromResource("filestorage/one_is_waiting_another_one_is_in_progress.json").toFile());
+        dataProvider.save(new TaskDay(LocalDate.parse("2022-02-06")));
+
+        String expected = contentOf(getPathFromResource("filestorage/two-days-with-one-task-in-each.json").toFile());
         assertThat(contentOf(storage.toFile())).isEqualTo(expected);
     }
 
     @Test
     void saveTask_UpdateTask_TaskUpdated() throws Exception {
         Path storage = createTempStorage();
-        write(storage, "filestorage/one_is_waiting_another_one_is_in_progress.json");
-        FileTaskDataProvider dataProvider = new FileTaskDataProvider(new FileDataProviderConfig(storage), taskConverter);
+        write(storage, "filestorage/two-days-with-one-task-in-each.json");
+        FileTaskDayDataProvider dataProvider = new FileTaskDayDataProvider(new FileDataProviderConfig(storage), taskDayConverter);
 
+        TaskDayTO toChange = new TaskDayTO();
+        toChange.setDate("2022-02-05");
         TaskTO taskTO = new TaskTO();
         taskTO.setName("NEW_TASK_CODE");
         taskTO.setState(TaskStateTO.WAITING);
+        toChange.setTasks(Collections.singletonList(taskTO));
 
-        Task taskToChange = new Task();
-        taskToChange.setName("NEW_TASK_CODE");
-        taskToChange.setState(TaskState.IN_PROGRESS);
+        when(taskDayConverter.convert(any(TaskDay.class)))
+            .thenReturn(toChange);
 
-        when(taskConverter.convert(any(Task.class)))
-            .thenReturn(taskTO);
+        dataProvider.save(new TaskDay(LocalDate.parse("2022-02-05")));
 
-        dataProvider.saveTask(taskToChange);
-
-        String expected = contentOf(getPathFromResource("filestorage/two_tasks_waiting.json").toFile());
+        String expected = contentOf(getPathFromResource("filestorage/two-days-with-waiting-tasks-in-each.json").toFile());
         assertThat(contentOf(storage.toFile())).isEqualTo(expected);
     }
 
     @Test
-    void getTaskInProgress_TaskExists_ReturnTask() throws Exception {
-        Task expected = new Task();
-        expected.setState(TaskState.IN_PROGRESS);
-        when(taskConverter.convert(any(TaskTO.class)))
-            .thenReturn(expected);
-
-        Path storage = createTempStorage();
-        write(storage, "filestorage/one_is_waiting_another_one_is_in_progress.json");
-        FileTaskDataProvider dataProvider = new FileTaskDataProvider(new FileDataProviderConfig(storage), taskConverter);
-
-        assertThat(dataProvider.getTaskInProgress()).isSameAs(expected);
-    }
-
-    @Test
-    void getTaskInProgress_TaskDoesNotExist_ReturnNull() throws Exception {
-        Path storage = createTempStorage();
-        write(storage, "filestorage/two_tasks_waiting.json");
-        FileTaskDataProvider dataProvider = new FileTaskDataProvider(new FileDataProviderConfig(storage), taskConverter);
-
-        assertThat(dataProvider.getTaskInProgress()).isNull();
-    }
-
-    @Test
     void getTasks() throws Exception {
-        Task task = new Task();
-        task.setName("NEW_TASK_CODE");
-        task.setState(TaskState.WAITING);
-        when(taskConverter.convert(any(TaskTO.class)))
+        Path storage = createTempStorage();
+        write(storage, "filestorage/single-day-single-task.json");
+        FileTaskDayDataProvider dataProvider = new FileTaskDayDataProvider(new FileDataProviderConfig(storage), taskDayConverter);
+
+        TaskDay task = new TaskDay(LocalDate.now());
+        when(taskDayConverter.convert(any(TaskDayTO.class)))
             .thenReturn(task);
 
-        Path storage = createTempStorage();
-        write(storage, "filestorage/new_task.json");
-        FileTaskDataProvider dataProvider = new FileTaskDataProvider(new FileDataProviderConfig(storage), taskConverter);
-
-        assertThat(dataProvider.getTasks()).isEqualTo(Collections.singletonList(task));
+        List<TaskDay> days = dataProvider.findAll();
+        assertThat(days).isNotNull();
+        assertThat(days.size()).isEqualTo(1);
+        assertThat(days.get(0)).isEqualTo(task);
     }
 }

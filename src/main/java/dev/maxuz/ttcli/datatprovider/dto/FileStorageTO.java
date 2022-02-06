@@ -6,5 +6,5 @@ import java.util.List;
 
 @Data
 public class FileStorageTO {
-    private List<TaskTO> tasks;
+    private List<TaskDayTO> days;
 }

@@ -2,7 +2,9 @@ package dev.maxuz.ttcli.command;
 
 import dev.maxuz.ttcli.exception.TtRuntimeException;
 import dev.maxuz.ttcli.model.Task;
+import dev.maxuz.ttcli.model.TaskDay;
 import dev.maxuz.ttcli.printer.Printer;
+import dev.maxuz.ttcli.service.TaskDayService;
 import dev.maxuz.ttcli.service.TaskService;
 import org.springframework.stereotype.Component;
 import picocli.CommandLine.Command;
@@ -13,10 +15,12 @@ import picocli.CommandLine.Parameters;
 public class TimeCommand implements SubCommand {
 
     public static final String TIME_FORMAT_ERROR_MSG = "Invalid time format. Expected example 1h 32m 11s";
+    private final TaskDayService taskDayService;
     private final TaskService taskService;
     private final Printer printer;
 
-    public TimeCommand(TaskService taskService, Printer printer) {
+    public TimeCommand(TaskDayService taskDayService, TaskService taskService, Printer printer) {
+        this.taskDayService = taskDayService;
         this.taskService = taskService;
         this.printer = printer;
     }
@@ -36,17 +40,18 @@ public class TimeCommand implements SubCommand {
                 "by passing values separated with space and specified with a time unit. Valid time units are h, m, s " +
                 "(hours, minutes, seconds respectively)") String amountOfTimeToAdd) {
         long timeToAdd = getTime(amountOfTimeToAdd);
-        Task task = getTask();
-        taskService.addTime(task, timeToAdd);
-        printer.info("Time successfully added.");
-    }
 
-    private Task getTask() {
-        Task task = taskService.getTask(name);
+        TaskDay taskDay = taskDayService.getCurrentDay();
+        if (taskDay == null) {
+            throw new TtRuntimeException("The day is not started");
+        }
+        Task task = taskService.getTask(taskDay, name);
         if (task == null) {
             throw new TtRuntimeException("Task with name [" + name + "] is not found");
         }
-        return task;
+        taskService.addTime(task, timeToAdd);
+        taskDayService.save(taskDay);
+        printer.info("Time successfully added.");
     }
 
     private long getTime(String amountOfTimeToAdd) {
@@ -82,15 +87,23 @@ public class TimeCommand implements SubCommand {
         }
     }
 
-    @Command(name = "subtract", aliases = {"sub"}, description = "Add time")
+    @Command(name = "subtract", aliases = {"sub"}, description = "Subtract time")
     public void subtract(
         @Parameters(paramLabel = "<time to subtract>",
             description = "Amount of time to subtract. You can specify how many hours, minutes or seconds you want to subtract" +
                 "by passing values separated with space and specified with a time unit. Valid time units are h, m, s " +
                 "(hours, minutes, seconds respectively)") String amountOfTimeString) {
         long millis = getTime(amountOfTimeString);
-        Task task = getTask();
+        TaskDay taskDay = taskDayService.getCurrentDay();
+        if (taskDay == null) {
+            throw new TtRuntimeException("The day is not started");
+        }
+        Task task = taskService.getTask(taskDay, name);
+        if (task == null) {
+            throw new TtRuntimeException("Task with name [" + name + "] is not found");
+        }
         taskService.subtractTime(task, millis);
+        taskDayService.save(taskDay);
         printer.info("Time successfully subtracted.");
     }
 }

@@ -2,12 +2,11 @@ package dev.maxuz.ttcli.datatprovider;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.maxuz.ttcli.config.FileDataProviderConfig;
-import dev.maxuz.ttcli.datatprovider.converter.TaskConverter;
+import dev.maxuz.ttcli.datatprovider.converter.TaskDayConverter;
 import dev.maxuz.ttcli.datatprovider.dto.FileStorageTO;
-import dev.maxuz.ttcli.datatprovider.dto.TaskStateTO;
-import dev.maxuz.ttcli.datatprovider.dto.TaskTO;
+import dev.maxuz.ttcli.datatprovider.dto.TaskDayTO;
 import dev.maxuz.ttcli.exception.TtRuntimeException;
-import dev.maxuz.ttcli.model.Task;
+import dev.maxuz.ttcli.model.TaskDay;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -17,26 +16,35 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
-public class FileTaskDataProvider implements TaskDataProvider {
+public class FileTaskDayDataProvider implements TaskDayDataProvider {
     private final ObjectMapper objectMapper = new ObjectMapper();
     private final Path storage;
-    private final TaskConverter taskConverter;
+    private final TaskDayConverter taskDayConverter;
 
-    public FileTaskDataProvider(FileDataProviderConfig config, TaskConverter taskConverter) {
+    public FileTaskDayDataProvider(FileDataProviderConfig config, TaskDayConverter taskDayConverter) {
         this.storage = config.getStorage();
-        this.taskConverter = taskConverter;
+        this.taskDayConverter = taskDayConverter;
     }
 
     @Override
-    public void saveTask(Task task) {
-        Map<String, TaskTO> taskMap = getTaskMap();
-        taskMap.put(task.getName(), taskConverter.convert(task));
-        write(taskMap.values());
+    public void save(TaskDay taskDay) {
+        Map<String, TaskDayTO> taskMap = getTaskDayMap();
+        TaskDayTO taskDayTo = taskDayConverter.convert(taskDay);
+        taskMap.put(taskDayTo.getDate(), taskDayTo);
+        write(taskMap.values().stream().sorted(Comparator.comparing(TaskDayTO::getDate).reversed()).collect(Collectors.toList()));
     }
 
-    private void write(Collection<TaskTO> values) {
+    @Override
+    public List<TaskDay> findAll() {
+        return getTaskDayTOList().stream()
+            .map(taskDayConverter::convert)
+            .sorted(Comparator.comparing(TaskDay::getDate).reversed())
+            .collect(Collectors.toList());
+    }
+
+    private void write(Collection<TaskDayTO> values) {
         FileStorageTO fileStorageTO = new FileStorageTO();
-        fileStorageTO.setTasks(new ArrayList<>(values));
+        fileStorageTO.setDays(new ArrayList<>(values));
         try {
             objectMapper.writerWithDefaultPrettyPrinter().writeValue(storage.toFile(), fileStorageTO);
         } catch (IOException e) {
@@ -44,14 +52,14 @@ public class FileTaskDataProvider implements TaskDataProvider {
         }
     }
 
-    private Map<String, TaskTO> getTaskMap() {
+    private Map<String, TaskDayTO> getTaskDayMap() {
         FileStorageTO storageTO = getFileStorageTO();
 
-        if (storageTO == null || storageTO.getTasks() == null) {
+        if (storageTO == null || storageTO.getDays() == null) {
             return new HashMap<>();
         }
-        return storageTO.getTasks().stream()
-            .collect(Collectors.toMap(TaskTO::getName, t -> t));
+        return storageTO.getDays().stream()
+            .collect(Collectors.toMap(TaskDayTO::getDate, d -> d));
     }
 
     private FileStorageTO getFileStorageTO() {
@@ -69,27 +77,9 @@ public class FileTaskDataProvider implements TaskDataProvider {
         }
     }
 
-    private List<TaskTO> getTaskTOList() {
+    private List<TaskDayTO> getTaskDayTOList() {
         return Optional.ofNullable(getFileStorageTO())
-            .map(FileStorageTO::getTasks)
+            .map(FileStorageTO::getDays)
             .orElse(Collections.emptyList());
-    }
-
-    @Override
-    public Task getTaskInProgress() {
-        List<TaskTO> taskTOList = getTaskTOList();
-
-        return taskTOList.stream()
-            .filter(t -> t.getState() == TaskStateTO.IN_PROGRESS)
-            .findFirst()
-            .map(taskConverter::convert)
-            .orElse(null);
-    }
-
-    @Override
-    public List<Task> getTasks() {
-        return getTaskTOList().stream()
-            .map(taskConverter::convert)
-            .collect(Collectors.toList());
     }
 }

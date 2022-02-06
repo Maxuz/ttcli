@@ -1,19 +1,18 @@
 package dev.maxuz.ttcli.service;
 
-import dev.maxuz.ttcli.datatprovider.TaskDataProvider;
-import dev.maxuz.ttcli.exception.TtInternalException;
 import dev.maxuz.ttcli.exception.TtRuntimeException;
-import dev.maxuz.ttcli.exception.TtWarningException;
 import dev.maxuz.ttcli.model.Task;
+import dev.maxuz.ttcli.model.TaskDay;
 import dev.maxuz.ttcli.model.TaskState;
+import org.assertj.core.api.AssertionsForClassTypes;
 import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.mockito.ArgumentCaptor;
 
 import java.time.Instant;
+import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -23,12 +22,9 @@ import static java.time.temporal.ChronoUnit.MINUTES;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.*;
 
-class TaskServiceImplTest {
-    private final TaskDataProvider taskDataProvider = mock(TaskDataProvider.class);
-
-    private final TaskServiceImpl service = new TaskServiceImpl(taskDataProvider);
+class TaskServiceTest {
+    private final TaskService service = new TaskService();
 
     private static Task createTask(String name) {
         Task task = new Task();
@@ -36,56 +32,27 @@ class TaskServiceImplTest {
         return task;
     }
 
+    private static TaskDay createTaskDay() {
+        return new TaskDay(LocalDate.now());
+    }
+
     @Test
     void addTask() {
+        TaskDay taskDay = createTaskDay();
         Task task = new Task();
-        service.addTask(task);
-        verify(taskDataProvider).saveTask(task);
+        service.addTask(taskDay, task);
+        assertThat(taskDay.getTasks().contains(task)).isTrue();
     }
 
     @Test
     void addTask_TaskAlreadyExists_ThrowsException() {
+        TaskDay taskDay = createTaskDay();
         Task task = createTask("THE_SAME_CODE");
+        taskDay.addTask(task);
 
-        when(taskDataProvider.getTasks())
-            .thenReturn(Collections.singletonList(task));
-
-        assertThatThrownBy(() -> service.addTask(task))
+        assertThatThrownBy(() -> service.addTask(taskDay, task))
             .isInstanceOf(TtRuntimeException.class)
             .hasMessage("Task with name [THE_SAME_CODE] is already exists");
-    }
-
-    @Test
-    void stopCurrent_CurrentExists_TaskStateUpdated() {
-        Task task = createTask("Code 1");
-        task.setState(TaskState.IN_PROGRESS);
-        task.setTimeSpent(0);
-        Instant now = Instant.now();
-        task.setStartTime(now.minus(60, MINUTES).toEpochMilli());
-
-        when(taskDataProvider.getTaskInProgress())
-            .thenReturn(task);
-
-        service.stopCurrent();
-
-        ArgumentCaptor<Task> taskArgumentCaptor = ArgumentCaptor.forClass(Task.class);
-        verify(taskDataProvider).saveTask(taskArgumentCaptor.capture());
-
-        Task actualTask = taskArgumentCaptor.getValue();
-        assertThat(actualTask.getName()).isEqualTo("Code 1");
-        assertThat(actualTask.getState()).isEqualTo(TaskState.WAITING);
-        assertThat(actualTask.getStartTime()).isNull();
-        assertThat(actualTask.getTimeSpent()).isCloseTo(3600000L, Offset.offset(999L));
-    }
-
-    @Test
-    void stopCurrent_CurrentDoesNotExist_DoNothing() {
-        when(taskDataProvider.getTaskInProgress())
-            .thenReturn(null);
-
-        service.stopCurrent();
-
-        verify(taskDataProvider, times(0)).saveTask(any());
     }
 
     private static Stream<Arguments> getTaskSource_Positive() {
@@ -110,60 +77,61 @@ class TaskServiceImplTest {
     @ParameterizedTest
     @MethodSource("getTaskSource_Positive")
     void getTask_Positive(List<Task> tasks, String name, Task expected) {
-        when(taskDataProvider.getTasks())
-            .thenReturn(tasks);
+        TaskDay taskDay = createTaskDay();
+        tasks.forEach(taskDay::addTask);
 
         if (expected == null) {
-            assertThat(service.getTask(name)).isNull();
+            assertThat(service.getTask(taskDay, name)).isNull();
         } else {
-            assertThat(service.getTask(name)).isEqualTo(expected);
+            assertThat(service.getTask(taskDay, name)).isEqualTo(expected);
         }
     }
 
     @Test
     void getTask_MultipleTaskForTheCode_ThrowsException() {
-        when(taskDataProvider.getTasks())
-            .thenReturn(Arrays.asList(createTask("A-1"), createTask("A-2")));
+        TaskDay taskDay = createTaskDay();
+        taskDay.addTask(createTask("A-1"));
+        taskDay.addTask(createTask("A-2"));
 
-        TtRuntimeException exception = assertThrows(TtRuntimeException.class, () -> service.getTask("A"));
+        TtRuntimeException exception = assertThrows(TtRuntimeException.class, () -> service.getTask(taskDay, "A"));
         assertThat(exception.getMessage()).isEqualTo("Found more than one task for name [A]");
     }
 
     @Test
     void getTask_CodeIsNull_ThrowsException() {
-        when(taskDataProvider.getTasks())
-            .thenReturn(Arrays.asList(createTask("A-1"), createTask("A-2")));
+        TaskDay taskDay = createTaskDay();
+        taskDay.addTask(createTask("A-1"));
+        taskDay.addTask(createTask("A-2"));
 
-        TtRuntimeException exception = assertThrows(TtRuntimeException.class, () -> service.getTask(null));
+        TtRuntimeException exception = assertThrows(TtRuntimeException.class, () -> service.getTask(taskDay, null));
         assertThat(exception.getMessage()).isEqualTo("The task name can't be empty");
     }
 
     @Test
     void getTask_CodeIsEmptyString_ThrowsException() {
-        when(taskDataProvider.getTasks())
-            .thenReturn(Arrays.asList(createTask("A-1"), createTask("A-2")));
+        TaskDay taskDay = createTaskDay();
+        taskDay.addTask(createTask("A-1"));
+        taskDay.addTask(createTask("A-2"));
 
-        TtRuntimeException exception = assertThrows(TtRuntimeException.class, () -> service.getTask(null));
+        TtRuntimeException exception = assertThrows(TtRuntimeException.class, () -> service.getTask(taskDay, null));
         assertThat(exception.getMessage()).isEqualTo("The task name can't be empty");
     }
 
     @Test
-    void stopAll() {
+    void stop() {
         Task task = createTask("Code 1");
         task.setState(TaskState.IN_PROGRESS);
         task.setTimeSpent(0);
         Instant now = Instant.now();
         task.setStartTime(now.minus(60, MINUTES).toEpochMilli());
 
-        when(taskDataProvider.getTasks())
-            .thenReturn(Collections.singletonList(task));
+        TaskDay taskDay = createTaskDay();
+        taskDay.addTask(task);
 
-        service.stop(task);
+        service.stop(taskDay);
 
-        ArgumentCaptor<Task> taskArgumentCaptor = ArgumentCaptor.forClass(Task.class);
-        verify(taskDataProvider).saveTask(taskArgumentCaptor.capture());
-
-        Task actualTask = taskArgumentCaptor.getValue();
+        assertThat(taskDay.getTasks().size()).isEqualTo(1);
+        Task actualTask = taskDay.getTasks().get(0);
         assertThat(actualTask.getName()).isEqualTo("Code 1");
         assertThat(actualTask.getState()).isEqualTo(TaskState.WAITING);
         assertThat(actualTask.getStartTime()).isNull();
@@ -172,17 +140,14 @@ class TaskServiceImplTest {
 
     @Test
     void startTask_StateIsWaiting_SaveCalledWithInProgressStateAndCurrentTime() {
-        Task sourceTask = createTask("Code 1");
-        sourceTask.setState(TaskState.WAITING);
+        Task task = createTask("Code 1");
+        task.setState(TaskState.WAITING);
 
-        service.start(sourceTask);
+        service.start(task);
 
-        ArgumentCaptor<Task> taskArgumentCaptor = ArgumentCaptor.forClass(Task.class);
-        verify(taskDataProvider).saveTask(taskArgumentCaptor.capture());
-        Task actualTask = taskArgumentCaptor.getValue();
-        assertThat(actualTask.getName()).isEqualTo("Code 1");
-        assertThat(actualTask.getState()).isEqualTo(TaskState.IN_PROGRESS);
-        assertThat(actualTask.getStartTime()).isCloseTo(Instant.now().toEpochMilli(), Offset.offset(100L));
+        assertThat(task.getName()).isEqualTo("Code 1");
+        assertThat(task.getState()).isEqualTo(TaskState.IN_PROGRESS);
+        assertThat(task.getStartTime()).isCloseTo(Instant.now().toEpochMilli(), Offset.offset(100L));
     }
 
     @Test
@@ -190,10 +155,9 @@ class TaskServiceImplTest {
         Task sourceTask = createTask("Code 1");
         sourceTask.setState(TaskState.IN_PROGRESS);
 
-        TtWarningException exception = assertThrows(TtWarningException.class, () -> service.start(sourceTask));
-        assertThat(exception.getMessage()).isEqualTo("Task with name [Code 1] is already started");
-
-        verify(taskDataProvider, times(0)).saveTask(any());
+        AssertionsForClassTypes.assertThatThrownBy(() -> service.start(sourceTask))
+            .isInstanceOf(TtRuntimeException.class)
+            .hasMessageContaining("Task with name [Code 1] is already started");
     }
 
     @Test
@@ -204,12 +168,13 @@ class TaskServiceImplTest {
         Instant now = Instant.now();
         task.setStartTime(now.minus(60, MINUTES).toEpochMilli());
 
-        service.stop(task);
+        TaskDay taskDay = createTaskDay();
+        taskDay.addTask(task);
 
-        ArgumentCaptor<Task> taskArgumentCaptor = ArgumentCaptor.forClass(Task.class);
-        verify(taskDataProvider).saveTask(taskArgumentCaptor.capture());
+        service.stop(taskDay);
 
-        Task actualTask = taskArgumentCaptor.getValue();
+        assertThat(taskDay.getTasks().size()).isEqualTo(1);
+        Task actualTask = taskDay.getTasks().get(0);
         assertThat(actualTask.getName()).isEqualTo("Code 1");
         assertThat(actualTask.getState()).isEqualTo(TaskState.WAITING);
         assertThat(actualTask.getStartTime()).isNull();
@@ -224,28 +189,17 @@ class TaskServiceImplTest {
         Instant now = Instant.now();
         task.setStartTime(now.minus(10, MINUTES).toEpochMilli());
 
-        service.stop(task);
+        TaskDay taskDay = createTaskDay();
+        taskDay.addTask(task);
 
-        ArgumentCaptor<Task> taskArgumentCaptor = ArgumentCaptor.forClass(Task.class);
-        verify(taskDataProvider).saveTask(taskArgumentCaptor.capture());
+        service.stop(taskDay);
 
-        Task actualTask = taskArgumentCaptor.getValue();
+        assertThat(taskDay.getTasks().size()).isEqualTo(1);
+        Task actualTask = taskDay.getTasks().get(0);
         assertThat(actualTask.getName()).isEqualTo("Code 1");
         assertThat(actualTask.getState()).isEqualTo(TaskState.WAITING);
         assertThat(actualTask.getStartTime()).isNull();
         assertThat(actualTask.getTimeSpent()).isCloseTo(1200000L, Offset.offset(999L));
-    }
-
-    @Test
-    void stopTask_StateIsNotInProgress_ThrowsException() {
-        Task sourceTask = createTask("Code 1");
-        sourceTask.setState(TaskState.WAITING);
-        sourceTask.setStartTime(Instant.now().toEpochMilli());
-
-        TtRuntimeException exception = assertThrows(TtRuntimeException.class, () -> service.stop(sourceTask));
-        assertThat(exception.getMessage()).isEqualTo("Task with name [Code 1] is not started");
-
-        verify(taskDataProvider, times(0)).saveTask(any());
     }
 
     @Test
@@ -254,18 +208,12 @@ class TaskServiceImplTest {
         sourceTask.setState(TaskState.IN_PROGRESS);
         sourceTask.setStartTime(null);
 
-        TtInternalException exception = assertThrows(TtInternalException.class, () -> service.stop(sourceTask));
-        assertThat(exception.getMessage()).isEqualTo("Internal error. Start time is empty");
+        TaskDay taskDay = createTaskDay();
+        taskDay.addTask(sourceTask);
 
-        verify(taskDataProvider, times(0)).saveTask(any());
-    }
-
-    @Test
-    void listTasks() {
-        List<Task> tasks = Arrays.asList(new Task(), new Task());
-        when(taskDataProvider.getTasks())
-            .thenReturn(tasks);
-        assertThat(service.getTasks()).isEqualTo(tasks);
+        AssertionsForClassTypes.assertThatThrownBy(() -> service.stop(taskDay))
+            .isInstanceOf(TtRuntimeException.class)
+            .hasMessageContaining("Internal error. Start time is empty");
     }
 
     @Test
@@ -275,10 +223,7 @@ class TaskServiceImplTest {
 
         service.addTime(task, 64000L);
 
-        ArgumentCaptor<Task> taskArgumentCaptor = ArgumentCaptor.forClass(Task.class);
-        verify(taskDataProvider).saveTask(taskArgumentCaptor.capture());
-
-        assertThat(taskArgumentCaptor.getValue().getTimeSpent()).isEqualTo(64000L);
+        assertThat(task.getTimeSpent()).isEqualTo(64000L);
     }
 
     @Test
@@ -288,10 +233,7 @@ class TaskServiceImplTest {
 
         service.addTime(task, 64000L);
 
-        ArgumentCaptor<Task> taskArgumentCaptor = ArgumentCaptor.forClass(Task.class);
-        verify(taskDataProvider).saveTask(taskArgumentCaptor.capture());
-
-        assertThat(taskArgumentCaptor.getValue().getTimeSpent()).isEqualTo(84000L);
+        assertThat(task.getTimeSpent()).isEqualTo(84000L);
     }
 
     private static final Instant now = Instant.now();
@@ -316,15 +258,11 @@ class TaskServiceImplTest {
 
         service.subtractTime(task, timeToSubtract);
 
-        ArgumentCaptor<Task> taskArgumentCaptor = ArgumentCaptor.forClass(Task.class);
-        verify(taskDataProvider).saveTask(taskArgumentCaptor.capture());
-
-        Task actualTask = taskArgumentCaptor.getValue();
-        assertThat(actualTask.getTimeSpent()).isEqualTo(expectedSpentTime);
+        assertThat(task.getTimeSpent()).isEqualTo(expectedSpentTime);
         if (expectedStartTime == null) {
-            assertThat(actualTask.getStartTime()).isNull();
+            assertThat(task.getStartTime()).isNull();
         } else {
-            assertThat(actualTask.getStartTime()).isCloseTo(expectedStartTime, Offset.offset(999L));
+            assertThat(task.getStartTime()).isCloseTo(expectedStartTime, Offset.offset(999L));
         }
     }
 }

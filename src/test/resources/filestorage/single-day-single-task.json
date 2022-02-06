@@ -1,0 +1,10 @@
+{
+  "days" : [ {
+    "date" : "2022-02-05",
+    "tasks" : [ {
+      "name" : "NEW_TASK_CODE",
+      "state" : "IN_PROGRESS",
+      "timeSpent" : 0
+    } ]
+  } ]
+}

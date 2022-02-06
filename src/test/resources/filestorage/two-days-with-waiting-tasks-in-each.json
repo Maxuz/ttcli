@@ -1,0 +1,17 @@
+{
+  "days" : [ {
+    "date" : "2022-02-06",
+    "tasks" : [ {
+      "name" : "SECOND_TASK",
+      "state" : "WAITING",
+      "timeSpent" : 0
+    } ]
+  }, {
+    "date" : "2022-02-05",
+    "tasks" : [ {
+      "name" : "NEW_TASK_CODE",
+      "state" : "WAITING",
+      "timeSpent" : 0
+    } ]
+  } ]
+}

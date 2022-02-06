@@ -1,6 +1,6 @@
 ext {
     versions = [
-            picocli: '4.6.1',
-            jackson: '2.12.3'
+            picocli: '4.6.2',
+            jackson: '2.13.1'
     ]
 }
