@@ -39,7 +39,7 @@ class AddCommandTest {
 
         ArgumentCaptor<Task> taskArgumentCaptor = ArgumentCaptor.forClass(Task.class);
         verify(taskService).addTask(eq(taskDay), taskArgumentCaptor.capture());
-        verify(taskDayService).save(taskDay);
+        verify(taskDayService, times(2)).save(taskDay);
         Task task = taskArgumentCaptor.getValue();
         assertThat(task.getName()).isEqualTo("TASK_CODE");
         assertThat(task.getState()).isEqualTo(TaskState.WAITING);
@@ -61,7 +61,7 @@ class AddCommandTest {
         Task task = taskArgumentCaptor.getValue();
         verify(taskService).stop(taskDay);
         verify(taskService).start(task);
-        verify(taskDayService).save(taskDay);
+        verify(taskDayService, times(2)).save(taskDay);
         verify(printer).info("Task {} added", "TASK_CODE");
     }
 
@@ -78,7 +78,7 @@ class AddCommandTest {
 
         ArgumentCaptor<Task> taskArgumentCaptor = ArgumentCaptor.forClass(Task.class);
         verify(taskService).addTask(eq(taskDay), taskArgumentCaptor.capture());
-        verify(taskDayService, times(2)).save(taskDay);
+        verify(taskDayService, times(3)).save(taskDay);
         verify(printer).info("Task {} added", "TASK_CODE");
     }
 

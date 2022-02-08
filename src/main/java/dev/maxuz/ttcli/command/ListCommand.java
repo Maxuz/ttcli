@@ -23,7 +23,8 @@ public class ListCommand implements SubCommand, Runnable {
     public void run() {
         TaskDay taskDay = taskDayService.getCurrentDay();
         if (taskDay == null) {
-            throw new TtRuntimeException("There is now started day - nothing to show");
+            printer.info("There is now started day - nothing to show");
+            return;
         }
         printer.info(taskDay.getTasks());
     }

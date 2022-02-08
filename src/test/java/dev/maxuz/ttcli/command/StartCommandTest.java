@@ -124,15 +124,31 @@ class StartCommandTest {
     }
 
     @Test
-    void startTask_DayIsNotStarted_StartTaskIsNotCalled() {
+    void startTask_DayIsNotStartedUserWantsToStart_StartTaskIsCalled() {
         Task task = new Task();
         task.setState(TaskState.WAITING);
         task.setName("TASK_CODE");
 
         when(taskDayService.getCurrentDay()).thenReturn(null);
+        when(questionnaire.askStartNewDay()).thenReturn(true);
+        when(taskService.getTask(any(), any())).thenReturn(task);
 
         StartCommand command = new StartCommand(taskDayService, taskService, printer, questionnaire);
         command.setName(task.getName());
+
+        command.run();
+
+        verify(taskService).start(any());
+        verify(taskDayService, times(2)).save(any());
+    }
+
+    @Test
+    void startTask_DayIsNotStartedUserDoesNotWantToStart_StartTaskIsNotCalled() {
+        when(taskDayService.getCurrentDay()).thenReturn(null);
+        when(questionnaire.askStartNewDay()).thenReturn(false);
+
+        StartCommand command = new StartCommand(taskDayService, taskService, printer, questionnaire);
+        command.setName("TASK_CODE");
 
         Assertions.assertThatThrownBy(command::run)
             .isInstanceOf(TtRuntimeException.class)
@@ -141,5 +157,4 @@ class StartCommandTest {
         verify(taskService, never()).start(any());
         verify(taskDayService, never()).save(any());
     }
-
 }

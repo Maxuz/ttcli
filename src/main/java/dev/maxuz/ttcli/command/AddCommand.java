@@ -3,7 +3,6 @@ package dev.maxuz.ttcli.command;
 import dev.maxuz.ttcli.exception.TtRuntimeException;
 import dev.maxuz.ttcli.model.Task;
 import dev.maxuz.ttcli.model.TaskDay;
-import dev.maxuz.ttcli.model.TaskState;
 import dev.maxuz.ttcli.printer.Printer;
 import dev.maxuz.ttcli.question.InteractiveQuestionnaire;
 import dev.maxuz.ttcli.service.TaskDayService;
@@ -13,11 +12,9 @@ import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 import picocli.CommandLine.Parameters;
 
-import java.time.LocalDate;
-
 @Component
 @Command(name = "add", description = "Add a new task to the task list.")
-public class AddCommand implements SubCommand, Runnable {
+public class AddCommand extends AbstractCommand implements SubCommand, Runnable {
 
     private final TaskService taskService;
     private final TaskDayService taskDayService;
@@ -25,6 +22,7 @@ public class AddCommand implements SubCommand, Runnable {
     private final InteractiveQuestionnaire questionnaire;
 
     public AddCommand(TaskDayService taskDayService, TaskService taskService, Printer printer, InteractiveQuestionnaire questionnaire) {
+        super(taskDayService, taskService, printer);
         this.taskService = taskService;
         this.taskDayService = taskDayService;
         this.printer = printer;
@@ -58,20 +56,19 @@ public class AddCommand implements SubCommand, Runnable {
     public void run() {
         TaskDay taskDay;
         if (startNewDay) {
-            taskDay = createTaskDay();
+            taskDay = startDay();
         } else {
             taskDay = taskDayService.getCurrentDay();
             if (taskDay == null) {
                 boolean answer = questionnaire.askStartNewDay();
                 if (answer) {
-                    taskDay = createTaskDay();
+                    taskDay = startDay();
                 } else {
                     throw new TtRuntimeException("New day is required. Exiting.");
                 }
             }
         }
-        Task task = createTask();
-        taskService.addTask(taskDay, task);
+        Task task = createTask(taskDay, name);
 
         if (startImmediately) {
             taskService.stop(taskDay);
@@ -79,19 +76,5 @@ public class AddCommand implements SubCommand, Runnable {
         }
         taskDayService.save(taskDay);
         printer.info("Task {} added", task.getName());
-    }
-
-    private TaskDay createTaskDay() {
-        TaskDay taskDay;
-        taskDay = new TaskDay(LocalDate.now());
-        taskDayService.save(taskDay);
-        return taskDay;
-    }
-
-    private Task createTask() {
-        Task task = new Task();
-        task.setName(name);
-        task.setState(TaskState.WAITING);
-        return task;
     }
 }

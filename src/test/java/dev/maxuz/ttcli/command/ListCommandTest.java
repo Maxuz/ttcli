@@ -38,8 +38,7 @@ class ListCommandTest {
         when(taskDayService.getCurrentDay()).thenReturn(null);
 
         ListCommand command = new ListCommand(taskDayService, printer);
-        assertThatThrownBy(command::run)
-            .isInstanceOf(TtRuntimeException.class)
-                .hasMessage("There is now started day - nothing to show");
+        command.run();
+        verify(printer).info("There is now started day - nothing to show");
     }
 }

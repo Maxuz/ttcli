@@ -48,22 +48,12 @@ class TaskDayServiceTest {
     }
 
     @Test
-    void getCurrentDay_CurrentDayIsYesterday_ReturnCurrentDay() {
+    void getCurrentDay_CurrentDayIsInThePast_ReturnNull() {
         TaskDay taskDay = createTaskDay(LocalDate.now().minusDays(1));
         when(dayDataProvider.findAll()).thenReturn(Collections.singletonList(taskDay));
 
         TaskDay actual = service.getCurrentDay();
-        assertThat(actual).isEqualTo(taskDay);
-    }
-
-    @Test
-    void getCurrentDay_CurrentDayIsInThePast_ThrowsWarning() {
-        TaskDay taskDay = createTaskDay(LocalDate.now().minusDays(2));
-        when(dayDataProvider.findAll()).thenReturn(Collections.singletonList(taskDay));
-
-        assertThatThrownBy(service::getCurrentDay)
-            .isInstanceOf(TtRuntimeException.class)
-            .hasMessage("The last task day is more than 2 days from now. Please start a new day");
+        assertThat(actual).isNull();
     }
 
     @Test

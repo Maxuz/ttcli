@@ -3,7 +3,6 @@ package dev.maxuz.ttcli.command;
 import dev.maxuz.ttcli.exception.TtRuntimeException;
 import dev.maxuz.ttcli.model.Task;
 import dev.maxuz.ttcli.model.TaskDay;
-import dev.maxuz.ttcli.model.TaskState;
 import dev.maxuz.ttcli.printer.Printer;
 import dev.maxuz.ttcli.question.InteractiveQuestionnaire;
 import dev.maxuz.ttcli.service.TaskDayService;
@@ -15,7 +14,7 @@ import picocli.CommandLine.Parameters;
 
 @Component
 @Command(name = "start", description = "Setting the start time and change status to the IN_PROGRESS")
-public class StartCommand implements SubCommand, Runnable {
+public class StartCommand extends AbstractCommand implements SubCommand, Runnable {
 
     private final TaskDayService taskDayService;
     private final TaskService taskService;
@@ -23,6 +22,7 @@ public class StartCommand implements SubCommand, Runnable {
     private final InteractiveQuestionnaire questionnaire;
 
     public StartCommand(TaskDayService taskDayService, TaskService taskService, Printer printer, InteractiveQuestionnaire questionnaire) {
+        super(taskDayService, taskService, printer);
         this.taskDayService = taskDayService;
         this.taskService = taskService;
         this.printer = printer;
@@ -49,16 +49,18 @@ public class StartCommand implements SubCommand, Runnable {
     public void run() {
         TaskDay taskDay = taskDayService.getCurrentDay();
         if (taskDay == null) {
-            throw new TtRuntimeException("Day is not started, so there is no tasks. Exiting.");
+            boolean createNewDay = questionnaire.askStartNewDay();
+            if (createNewDay) {
+                taskDay = startDay();
+            } else {
+                throw new TtRuntimeException("Day is not started, so there is no tasks. Exiting.");
+            }
         }
         Task task = taskService.getTask(taskDay, name);
         if (task == null) {
             boolean answer = questionnaire.createTask(name);
             if (answer) {
-                task = createTask();
-                taskService.addTask(taskDay, task);
-                taskDayService.save(taskDay);
-                printer.info("Task [" + name + "] is created");
+                task = createTask(taskDay, name);
             } else {
                 throw new TtRuntimeException("Task with name [" + name + "] is not found");
             }
@@ -72,12 +74,5 @@ public class StartCommand implements SubCommand, Runnable {
 
         taskDayService.save(taskDay);
         printer.info("Task {} successfully started", task.getName());
-    }
-
-    private Task createTask() {
-        Task task = new Task();
-        task.setName(name);
-        task.setState(TaskState.IN_PROGRESS);
-        return task;
     }
 }

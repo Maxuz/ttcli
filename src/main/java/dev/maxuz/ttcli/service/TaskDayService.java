@@ -24,12 +24,12 @@ public class TaskDayService {
         TaskDay currentDay = days.get(0);
         if (currentDay != null) {
             LocalDate now = LocalDate.now();
-            if (currentDay.getDate().equals(now) || currentDay.getDate().equals(now.minusDays(1))) {
+            if (currentDay.getDate().equals(now)) {
                 return currentDay;
             } else if (currentDay.getDate().isAfter(now)) {
                 throw new TtRuntimeException("Illegal state - current date can't be in the future");
             } else if (currentDay.getDate().isBefore(now)) {
-                throw new TtRuntimeException("The last task day is more than 2 days from now. Please start a new day");
+                return null;
             } else {
                 throw new TtRuntimeException("Unhandled state: " + currentDay);
             }
