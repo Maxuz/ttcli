@@ -31,7 +31,7 @@ class StopCommandTest {
 
         verify(taskService).stop(taskDay);
         verify(taskDayService).save(taskDay);
-        verify(printer).info("Stopping tasks");
+        verify(printer).info("All tasks were stopped");
     }
 
     @Test

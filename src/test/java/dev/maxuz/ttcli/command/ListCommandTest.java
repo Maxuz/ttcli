@@ -30,7 +30,7 @@ class ListCommandTest {
         ListCommand command = new ListCommand(taskDayService, printer);
         command.run();
 
-        verify(printer).info(taskDay.getTasks());
+        verify(printer).info(taskDay);
     }
 
     @Test

@@ -28,8 +28,8 @@ public class StopCommand implements SubCommand, Runnable {
         if (taskDay == null) {
             throw new TtRuntimeException("Day is not started");
         }
-        printer.info("Stopping tasks");
         taskService.stop(taskDay);
         taskDayService.save(taskDay);
+        printer.info("All tasks were stopped");
     }
 }
