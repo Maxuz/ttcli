@@ -26,6 +26,6 @@ public class ListCommand implements SubCommand, Runnable {
             printer.info("There is now started day - nothing to show");
             return;
         }
-        printer.info(taskDay.getTasks());
+        printer.info(taskDay);
     }
 }
