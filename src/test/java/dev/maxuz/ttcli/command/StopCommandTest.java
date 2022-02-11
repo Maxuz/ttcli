@@ -24,7 +24,7 @@ class StopCommandTest {
     @Test
     void stopTask_TaskExist_StopCalled() {
         TaskDay taskDay = getTaskDay();
-        when(taskDayService.getCurrentDay()).thenReturn(taskDay);
+        when(taskDayService.getLastDay()).thenReturn(taskDay);
 
         StopCommand stopCommand = new StopCommand(taskDayService, taskService, printer);
         stopCommand.run();
@@ -36,7 +36,7 @@ class StopCommandTest {
 
     @Test
     void stopTask_CurrentDayIsNull_ThrowsException() {
-        when(taskDayService.getCurrentDay()).thenReturn(null);
+        when(taskDayService.getLastDay()).thenReturn(null);
 
         StopCommand stopCommand = new StopCommand(taskDayService, taskService, printer);
         assertThatThrownBy(stopCommand::run)

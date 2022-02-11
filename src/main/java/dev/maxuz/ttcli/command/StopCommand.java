@@ -24,7 +24,7 @@ public class StopCommand implements SubCommand, Runnable {
 
     @Override
     public void run() {
-        TaskDay taskDay = taskDayService.getCurrentDay();
+        TaskDay taskDay = taskDayService.getLastDay();
         if (taskDay == null) {
             throw new TtRuntimeException("Day is not started");
         }

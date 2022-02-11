@@ -37,6 +37,14 @@ public class TaskDayService {
         return null;
     }
 
+    public TaskDay getLastDay() {
+        List<TaskDay> days = taskDayDataProvider.findAll();
+        if (days == null || days.isEmpty()) {
+            return null;
+        }
+        return days.get(0);
+    }
+
     public void save(TaskDay taskDay) {
         if (taskDay == null) {
             throw new TtRuntimeException("Task day can't be null");
