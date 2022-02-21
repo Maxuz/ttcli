@@ -51,7 +51,7 @@ public class TimeCommand implements SubCommand {
         }
         taskService.addTime(task, timeToAdd);
         taskDayService.save(taskDay);
-        printer.info("Time successfully added.");
+        printer.info("{} were added to {} task.", amountOfTimeToAdd, name);
     }
 
     private long getTime(String amountOfTimeToAdd) {
@@ -104,6 +104,6 @@ public class TimeCommand implements SubCommand {
         }
         taskService.subtractTime(task, millis);
         taskDayService.save(taskDay);
-        printer.info("Time successfully subtracted.");
+        printer.info("{} were subtracted from {} task.", amountOfTimeString, name);
     }
 }

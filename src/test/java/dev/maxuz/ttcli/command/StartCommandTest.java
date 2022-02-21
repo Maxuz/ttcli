@@ -49,7 +49,7 @@ class StartCommandTest {
 
         verify(taskService).start(task);
         verify(taskDayService).save(taskDay);
-        verify(printer).info("Task {} successfully started", "TASK_CODE");
+        verify(printer).info("Task {} started", "TASK_CODE");
     }
 
     @Test

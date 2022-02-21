@@ -68,11 +68,11 @@ public class StartCommand extends AbstractCommand implements SubCommand, Runnabl
 
         if (stopOthers) {
             taskService.stop(taskDay);
-            printer.info("All tasks successfully stopped");
+            printer.info("All tasks stopped");
         }
         taskService.start(task);
 
         taskDayService.save(taskDay);
-        printer.info("Task {} successfully started", task.getName());
+        printer.info("Task {} started", task.getName());
     }
 }
