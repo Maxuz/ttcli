@@ -139,4 +139,17 @@ public class TaskService {
             task.setTimeSpent(0L);
         }
     }
+
+    /**
+     * Counts the time spent on the task
+     * @param task to count time
+     * @return time in milliseconds spent on the task
+     */
+    public long countTaskTime(Task task) {
+        long taskTime = task.getTimeSpent();
+        if (task.getStartTime() != null) {
+            taskTime += Instant.now().toEpochMilli() - task.getStartTime();
+        }
+        return taskTime;
+    }
 }

@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class TaskDayService {
@@ -50,5 +51,16 @@ public class TaskDayService {
             throw new TtRuntimeException("Task day can't be null");
         }
         taskDayDataProvider.save(taskDay);
+    }
+
+    public List<TaskDay> find(LocalDate fromInclusive, LocalDate toInclusive) {
+        if (toInclusive.isBefore(fromInclusive)) {
+            throw new TtRuntimeException("To date can't be before from date");
+        }
+        final LocalDate fromExclusive = fromInclusive.minusDays(1);
+        final LocalDate toExclusive = toInclusive.plusDays(1);
+        return taskDayDataProvider.findAll().stream()
+            .filter(day -> day.getDate().isAfter(fromExclusive) && day.getDate().isBefore(toExclusive))
+            .collect(Collectors.toList());
     }
 }

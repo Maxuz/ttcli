@@ -32,6 +32,13 @@ class TaskServiceTest {
         return task;
     }
 
+    private static Task createTask(long spentTime, Long startTime) {
+        Task task = new Task();
+        task.setTimeSpent(spentTime);
+        task.setStartTime(startTime);
+        return task;
+    }
+
     private static TaskDay createTaskDay() {
         return new TaskDay(LocalDate.now());
     }
@@ -264,5 +271,21 @@ class TaskServiceTest {
         } else {
             assertThat(task.getStartTime()).isCloseTo(expectedStartTime, Offset.offset(999L));
         }
+    }
+
+    private static Stream<Arguments> countTaskTimeSource() {
+        return Stream.of(
+            Arguments.of(createTask(0, null), 0L),
+            Arguments.of(createTask(0, Instant.now().minusMillis(100).toEpochMilli()), 100),
+            Arguments.of(createTask(123, null), 123),
+            Arguments.of(createTask(100, Instant.now().minusMillis(100).toEpochMilli()), 200)
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource("countTaskTimeSource")
+    void countTaskTime(Task task, long expected) {
+        Long actual = service.countTaskTime(task);
+        assertThat(actual).isCloseTo(expected, Offset.offset(200L));
     }
 }
