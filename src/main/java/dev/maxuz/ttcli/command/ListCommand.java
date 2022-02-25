@@ -63,11 +63,13 @@ public class ListCommand implements SubCommand, Runnable {
             return;
         }
         taskDays.forEach(printer::info);
-        printer.info("Total time for the period from {} to {} is: {}",
-            from.format(DateTimeFormatter.ISO_DATE),
-            to.format(DateTimeFormatter.ISO_DATE),
-            countTotalTime(taskDays)
-        );
+        if (taskDays.size() > 1) {
+            printer.info("Total time for the period from {} to {} is: {}",
+                from.format(DateTimeFormatter.ISO_DATE),
+                to.format(DateTimeFormatter.ISO_DATE),
+                countTotalTime(taskDays)
+            );
+        }
     }
 
     private String countTotalTime(List<TaskDay> taskDays) {
